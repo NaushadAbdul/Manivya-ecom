@@ -27,8 +27,8 @@ export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Active Admin Resolution: check dedicated adminUser session first, fallback to storefront user if admin
-  const activeAdmin = adminUser || (user?.role === 'admin' ? user : null);
+  // Active Admin Resolution: strictly check dedicated adminUser session
+  const activeAdmin = adminUser;
 
   if (loading) {
     return (

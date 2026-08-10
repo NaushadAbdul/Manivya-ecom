@@ -34,8 +34,6 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${adminToken}`;
   } else if (customerToken) {
     config.headers.Authorization = `Bearer ${customerToken}`;
-  } else if (adminToken) {
-    config.headers.Authorization = `Bearer ${adminToken}`;
   }
 
   return config;

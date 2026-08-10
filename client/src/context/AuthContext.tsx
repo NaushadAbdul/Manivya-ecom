@@ -35,7 +35,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Storefront Customer Auth Session
+  // Storefront Customer Auth Session (Loaded directly from customer keys)
   const [user, setUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('manivya_customer_user');
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return localStorage.getItem('manivya_customer_token') || localStorage.getItem('manivya_token');
   });
 
-  // Dedicated Isolated Admin Portal Auth Session
+  // Dedicated Isolated Admin Portal Auth Session (Loaded directly from admin keys)
   const [adminUser, setAdminUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('manivya_admin_user');
@@ -63,93 +63,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Persistent Firebase Auth Observer (Synchronizes customer storefront session)
+  // Background Token Sync (Matches active firebaseUser strictly by Provider UID / Email)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        const isPasswordUser = firebaseUser.providerData.some((p) => p.providerId === 'password');
-        if (isPasswordUser && !firebaseUser.emailVerified) {
-          await signOut(auth).catch(() => {});
-          localStorage.removeItem('manivya_customer_token');
-          localStorage.removeItem('manivya_customer_user');
-          setToken(null);
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        try {
-          const idToken = await firebaseUser.getIdToken();
-          const email = firebaseUser.email || '';
-          const isAdmin = email.includes('admin') || email.toLowerCase().trim() === 'naushadabdul2006@gmail.com';
-
-          let userData: User = {
-            _id: firebaseUser.uid,
-            uid: firebaseUser.uid,
-            name: firebaseUser.displayName || email.split('@')[0] || 'Valued Customer',
-            email,
-            photo: firebaseUser.photoURL || '',
-            provider: firebaseUser.providerData[0]?.providerId || 'password',
-            role: isAdmin ? 'admin' : 'customer',
-            status: 'active',
-            loginCount: 1,
-            totalSpent: 0,
-            createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString(),
-          } as any;
-
-          try {
-            const syncRes = await apiService.syncUser({
-              uid: firebaseUser.uid,
-              name: firebaseUser.displayName || email.split('@')[0] || 'Valued Customer',
-              email,
-              photo: firebaseUser.photoURL || '',
-              provider: firebaseUser.providerData[0]?.providerId || 'password',
-            });
-            if (syncRes.data.success) {
-              userData = syncRes.data.data;
-            }
-          } catch (syncErr) {}
-
-          // If logging into admin account on storefront or customer account, set customer session safely
-          localStorage.setItem('manivya_customer_token', idToken);
-          localStorage.setItem('manivya_customer_user', JSON.stringify(userData));
-          setToken(idToken);
-          setUser(userData);
-        } catch (err: any) {
-          console.warn('Backend token verification error', err);
-        }
-      } else {
-        // Firebase signed out on customer side
-        localStorage.removeItem('manivya_customer_token');
-        localStorage.removeItem('manivya_customer_user');
-        setToken(null);
-        setUser(null);
+      if (!firebaseUser) {
+        setLoading(false);
+        return;
       }
+
+      const savedCustomerRaw = localStorage.getItem('manivya_customer_user');
+      const savedCustomerToken = localStorage.getItem('manivya_customer_token');
+      const savedAdminRaw = localStorage.getItem('manivya_admin_user');
+      const savedAdminToken = localStorage.getItem('manivya_admin_token');
+
+      // 1. Refresh Customer token ONLY if firebaseUser matches saved Customer session identity
+      if (savedCustomerRaw && savedCustomerToken) {
+        try {
+          const savedCustomer = JSON.parse(savedCustomerRaw);
+          const isCustomerMatch =
+            firebaseUser.uid === savedCustomer.uid ||
+            (firebaseUser.email &&
+              firebaseUser.email.toLowerCase().trim() === savedCustomer.email?.toLowerCase().trim());
+
+          if (isCustomerMatch) {
+            const idToken = await firebaseUser.getIdToken();
+            localStorage.setItem('manivya_customer_token', idToken);
+            setToken(idToken);
+          }
+        } catch (e) {}
+      }
+
+      // 2. Refresh Admin token ONLY if firebaseUser matches saved Admin session identity
+      if (savedAdminRaw && savedAdminToken) {
+        try {
+          const savedAdmin = JSON.parse(savedAdminRaw);
+          const isAdminMatch =
+            firebaseUser.uid === savedAdmin.uid ||
+            (firebaseUser.email &&
+              firebaseUser.email.toLowerCase().trim() === savedAdmin.email?.toLowerCase().trim());
+
+          if (isAdminMatch) {
+            const idToken = await firebaseUser.getIdToken();
+            localStorage.setItem('manivya_admin_token', idToken);
+            setAdminToken(idToken);
+          }
+        } catch (e) {}
+      }
+
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // ── Customer Login Methods ──
+  // ── Customer Storefront Login Methods ──
   const loginWithGoogle = async () => {
     try {
       setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
-
       const email = result.user.email || '';
-      const isAdmin = email.includes('admin') || email.toLowerCase().trim() === 'naushadabdul2006@gmail.com';
 
       let userData: User = {
         _id: result.user.uid,
         uid: result.user.uid,
-        name: result.user.displayName || email.split('@')[0],
+        name: result.user.displayName || email.split('@')[0] || 'Valued Customer',
         email,
         photo: result.user.photoURL || '',
         provider: 'google.com',
-        role: isAdmin ? 'admin' : 'customer',
+        role: 'customer',
         status: 'active',
         loginCount: 1,
         totalSpent: 0,
@@ -160,10 +142,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const syncRes = await apiService.syncUser({
           uid: result.user.uid,
-          name: result.user.displayName || email.split('@')[0],
+          name: result.user.displayName || email.split('@')[0] || 'Valued Customer',
           email,
           photo: result.user.photoURL || '',
           provider: 'google.com',
+          isAdminPortal: false,
         });
         if (syncRes.data.success) {
           userData = syncRes.data.data;
@@ -205,7 +188,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const idToken = await result.user.getIdToken();
-      const isAdmin = userEmail.includes('admin') || userEmail.toLowerCase().trim() === 'naushadabdul2006@gmail.com';
 
       let userData: User = {
         _id: result.user.uid,
@@ -214,7 +196,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: userEmail,
         photo: result.user.photoURL || '',
         provider: 'password',
-        role: isAdmin ? 'admin' : 'customer',
+        role: 'customer',
         status: 'active',
         loginCount: 1,
         totalSpent: 0,
@@ -228,6 +210,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: result.user.displayName || userEmail.split('@')[0],
           email: userEmail,
           provider: 'password',
+          isAdminPortal: false,
         });
         if (syncRes.data.success) {
           userData = syncRes.data.data;
@@ -267,15 +250,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginAdminWithEmail = async (email: string, pass: string) => {
     try {
       setLoading(true);
-      const result = await signInWithEmailAndPassword(auth, email, pass);
-      const userEmail = result.user.email || email;
 
+      let result;
+      try {
+        result = await signInWithEmailAndPassword(auth, email, pass);
+      } catch (signInErr: any) {
+        const code = signInErr?.code || '';
+        if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+          result = await createUserWithEmailAndPassword(auth, email, pass);
+        } else {
+          throw signInErr;
+        }
+      }
+
+      const userEmail = result.user.email || email;
       const idToken = await result.user.getIdToken();
 
       let adminData: User = {
         _id: result.user.uid,
         uid: result.user.uid,
-        name: result.user.displayName || 'MANIVYA Admin',
+        name: result.user.displayName || userEmail.split('@')[0] || 'MANIVYA Admin',
         email: userEmail,
         photo: result.user.photoURL || '',
         provider: 'password',
@@ -293,13 +287,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: result.user.displayName || userEmail.split('@')[0],
           email: userEmail,
           provider: 'password',
+          isAdminPortal: true,
         });
         if (syncRes.data.success) {
           adminData = syncRes.data.data;
         }
-      } catch (err) {}
+      } catch (err: any) {
+        const msg = err.response?.data?.message || err.message || 'Admin authentication failed';
+        toast.error(msg);
+        throw new Error(msg);
+      }
 
-      // Save into isolated Admin localStorage session
       localStorage.setItem('manivya_admin_token', idToken);
       localStorage.setItem('manivya_admin_user', JSON.stringify(adminData));
       setAdminToken(idToken);
@@ -308,7 +306,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success(`Admin authenticated: ${adminData.name}`);
     } catch (err: any) {
       const msg = err.message || 'Admin authentication failed';
-      toast.error(msg);
       throw new Error(msg);
     } finally {
       setLoading(false);
@@ -344,11 +341,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email,
           photo: result.user.photoURL || '',
           provider: 'google.com',
+          isAdminPortal: true,
         });
         if (syncRes.data.success) {
           adminData = syncRes.data.data;
         }
-      } catch (err) {}
+      } catch (err: any) {
+        const msg = err.response?.data?.message || err.message || 'Google Admin authentication failed';
+        toast.error(msg);
+        throw new Error(msg);
+      }
 
       localStorage.setItem('manivya_admin_token', idToken);
       localStorage.setItem('manivya_admin_user', JSON.stringify(adminData));
@@ -357,8 +359,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast.success(`Admin authenticated: ${adminData.name}`);
     } catch (err: any) {
-      toast.error(err.message || 'Google Admin authentication failed');
-      throw err;
+      const msg = err.message || 'Google Admin authentication failed';
+      throw new Error(msg);
     } finally {
       setLoading(false);
     }
@@ -427,10 +429,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Logout ONLY Customer Session
-  const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {}
+  const logout = () => {
     localStorage.removeItem('manivya_customer_token');
     localStorage.removeItem('manivya_customer_user');
     localStorage.removeItem('manivya_token');

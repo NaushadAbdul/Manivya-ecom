@@ -36,24 +36,44 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
 
 export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
   try {
-    const { uid, name, email, photo, provider } = req.body;
+    const { uid, name, email, photo, provider, isAdminPortal } = req.body;
     const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
-    let user = await User.findOne({
-      $or: [
-        { uid },
-        ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
-      ],
-    });
+    if (!uid) {
+      return sendError(res, 'Provider UID is required for user synchronization', 400);
+    }
+
+    // 1. Primary lookup by Provider UID (Source of Truth)
+    let user = await User.findOne({ uid });
+
+    // 2. Secondary lookup by Email if UID not linked yet
+    if (!user && normalizedEmail) {
+      user = await User.findOne({ email: normalizedEmail });
+    }
+
+    const isDefinedAdmin = isDefinedAdminEmail(normalizedEmail);
+
+    // If request originates from Admin Portal login, verify admin authorization
+    if (isAdminPortal) {
+      const isAuthorizedAdmin = isDefinedAdmin || (user && user.role === 'admin');
+      if (!isAuthorizedAdmin) {
+        return sendError(
+          res,
+          `Access Denied: The account (${normalizedEmail || uid}) does not have administrator privileges.`,
+          403
+        );
+      }
+    }
 
     if (!user) {
+      const initialRole = isDefinedAdmin ? 'admin' : 'customer';
       user = await User.create({
         uid,
-        name: name || normalizedEmail.split('@')[0],
+        name: name || normalizedEmail.split('@')[0] || 'Valued Customer',
         email: normalizedEmail,
         photo: photo || '',
         provider: provider || 'google',
-        role: isDefinedAdminEmail(normalizedEmail) ? 'admin' : 'customer',
+        role: initialRole,
         lastLogin: new Date(),
       });
 
@@ -64,8 +84,8 @@ export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
         'account'
       );
     } else {
-      user.uid = uid;
-      if (isDefinedAdminEmail(normalizedEmail) && user.role !== 'admin') {
+      user.uid = uid; // Ensure Google UID is linked
+      if (isDefinedAdmin && user.role !== 'admin') {
         user.role = 'admin';
       }
       user.lastLogin = new Date();
