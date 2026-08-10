@@ -45,6 +45,15 @@ export const apiService = {
   updateProfile: (data: { name?: string; phone?: string; photo?: string }) => api.put('/auth/profile', data),
   syncUser: (userData: any) => api.post('/auth/sync', userData),
   getAllUsers: () => api.get('/auth/users'),
+  createNewAdminUser: (data: { name: string; email: string; phone?: string; password?: string }) =>
+    api.post('/auth/sync', {
+      uid: `admin_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      provider: data.password ? 'password' : 'admin_grant',
+      isAdminPortal: true,
+    }),
   updateUserRole: (userId: string, role: string) => api.patch(`/auth/users/${userId}/role`, { role }),
 
   // Products
