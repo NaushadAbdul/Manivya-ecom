@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-slate-100 font-sans antialiased;
+    min-height: 100vh;
+    background: #050008;
+    background-image:
+      radial-gradient(ellipse 120% 80% at 80% 0%, #1a00a0 0%, transparent 60%),
+      radial-gradient(ellipse 100% 100% at 50% 50%, #3b0080 0%, transparent 70%),
+      radial-gradient(ellipse 80% 70% at 100% 100%, #c8a0ff40 0%, transparent 50%),
+      radial-gradient(ellipse 60% 50% at 0% 0%, #000000 0%, transparent 60%);
+    background-attachment: fixed;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #08001a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a1060;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b1a9e;
+}
+
+/* Category Marquee Animation */
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 28s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Shimmer Beam for Category Cards */
+@keyframes shimmerBeam {
+  0% { transform: translateX(-150%) rotate(25deg); }
+  100% { transform: translateX(250%) rotate(25deg); }
+}
+
+.category-card-shimmer {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+.group:hover .category-card-shimmer {
+  animation: shimmerBeam 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
