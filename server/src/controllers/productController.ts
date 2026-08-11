@@ -5,8 +5,13 @@ import Category from '../models/Category';
 import { sendSuccess, sendError } from '../utils/apiResponse';
 import { uploadToCloudinary } from '../config/cloudinary';
 
+import { connectDB } from '../config/db';
+
 export const getProducts = async (req: Request, res: Response) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 12;
     const skip = (page - 1) * limit;

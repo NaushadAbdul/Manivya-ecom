@@ -20,7 +20,13 @@ export const connectDB = async () => {
     }
 
     const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/manivya';
-    const conn = await mongoose.connect(connStr);
+    const maskedUri = connStr.replace(/:([^@]+)@/, ':****@');
+    console.log(`[MongoDB Atlas] Attempting connection with URI: ${maskedUri}`);
+
+    const conn = await mongoose.connect(connStr, {
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
+    });
     isDbConnected = true;
     lastDbError = null;
     console.log(`[MongoDB Atlas] Connected successfully: ${conn.connection.host}`);
@@ -28,6 +34,5 @@ export const connectDB = async () => {
     isDbConnected = false;
     lastDbError = (error as Error).message;
     console.error(`[MongoDB Atlas] Connection Error: ${lastDbError}`);
-    console.warn('[MongoDB Atlas] Operating with fallback mode if offline.');
   }
 };
