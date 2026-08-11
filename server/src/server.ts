@@ -40,10 +40,18 @@ const allowedOrigins = rawClientUrl.split(',').map((url) => url.trim().replace(/
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin.replace(/\/+$/, '')) || process.env.NODE_ENV !== 'production') {
+      const cleanOrigin = origin ? origin.replace(/\/+$/, '') : '';
+      const isVercel = cleanOrigin.endsWith('.vercel.app');
+      if (
+        !origin ||
+        rawClientUrl === '*' ||
+        allowedOrigins.includes(cleanOrigin) ||
+        isVercel ||
+        process.env.NODE_ENV !== 'production'
+      ) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS policy blocked access from origin: ${origin}`));
+        callback(null, true);
       }
     },
     credentials: true,
