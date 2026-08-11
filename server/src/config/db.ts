@@ -1,9 +1,18 @@
 import mongoose from 'mongoose';
 import dns from 'dns';
 
+let lastDbError: string | null = null;
+let isDbConnected = false;
+
+export const getDbStatus = () => ({
+  isConnected: isDbConnected || mongoose.connection.readyState === 1,
+  readyState: mongoose.connection.readyState,
+  lastError: lastDbError,
+  hasUri: !!process.env.MONGODB_URI,
+});
+
 export const connectDB = async () => {
   try {
-    // Configure DNS resolution fallback for Windows SRV queries
     if (process.platform === 'win32') {
       try {
         dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
@@ -12,9 +21,13 @@ export const connectDB = async () => {
 
     const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/manivya';
     const conn = await mongoose.connect(connStr);
+    isDbConnected = true;
+    lastDbError = null;
     console.log(`[MongoDB Atlas] Connected successfully: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`[MongoDB Atlas] Connection Error: ${(error as Error).message}`);
+    isDbConnected = false;
+    lastDbError = (error as Error).message;
+    console.error(`[MongoDB Atlas] Connection Error: ${lastDbError}`);
     console.warn('[MongoDB Atlas] Operating with fallback mode if offline.');
   }
 };

@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { connectDB } from './config/db';
+import { connectDB, getDbStatus } from './config/db';
 import { initFirebaseAdmin } from './config/firebase';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -81,6 +81,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'online',
     service: 'MANIVYA Enterprises E-Commerce API',
+    db: getDbStatus(),
     timestamp: new Date(),
   });
 });
