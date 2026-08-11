@@ -90,7 +90,8 @@ export const getProducts = async (req: Request, res: Response) => {
       pages: Math.ceil(total / limit) || 1,
     });
   } catch (err) {
-    return sendError(res, (err as Error).message, 500);
+    console.error('[getProducts Error]:', err);
+    return sendError(res, `[getProducts Error] ${(err as Error).message || err}`, 500);
   }
 };
 
