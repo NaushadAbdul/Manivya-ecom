@@ -446,7 +446,7 @@ export const Category3DHero: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <div className="relative z-20 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 py-8 flex items-center justify-between gap-4">
+      <div className="relative z-20 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 py-4 sm:py-8 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
         
         {/* HUGE Dynamic Watermark Text in Background */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden z-0">
@@ -468,8 +468,90 @@ export const Category3DHero: React.FC = () => {
           </AnimatePresence>
         </div>
 
-        {/* Left Side: Floating Glassmorphism Product Card */}
-        <div className="relative z-20 w-full max-w-xs sm:max-w-sm shrink-0">
+        {/* TOP FOR MOBILE / CENTER FOR DESKTOP: 3D Floating Product Showcase */}
+        <div className="relative z-20 w-full md:flex-1 flex flex-col justify-center items-center py-2 sm:py-4 order-1 md:order-2">
+          {/* Mobile Only Header */}
+          <div className="md:hidden text-center mb-3">
+            <h3 className="text-xl font-black text-white tracking-tight drop-shadow-md">Product Gallery</h3>
+            <span className="inline-block text-[11px] font-bold px-3 py-0.5 rounded-full bg-white/30 text-white border border-white/40 mt-1">
+              {currentItem.name} Collection
+            </span>
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentItem.id}
+              initial={{ opacity: 0, scale: 0.8, rotateY: -25, rotateZ: -5 }}
+              animate={{ opacity: 1, scale: 1, rotateY: mousePos.x * 20 - 6, rotateX: -mousePos.y * 20 + 4, rotateZ: 3 }}
+              exit={{ opacity: 0, scale: 0.85, rotateY: 25, rotateZ: 5 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="relative group cursor-pointer w-full max-w-sm sm:max-w-md flex justify-center"
+              style={{
+                perspective: '1200px',
+                transformStyle: 'preserve-3d',
+              }}
+              onClick={() => handleCategoryClick(currentItem)}
+              title={`Click to view all ${currentItem.name} products`}
+            >
+              {/* White Framed Floating Container with Perspective Shadow */}
+              <div
+                className="relative w-full bg-white rounded-3xl p-4 sm:p-6 shadow-[0_30px_70px_rgba(0,0,0,0.4)] border border-white/80 transition-transform duration-300 group-hover:scale-105"
+                style={{
+                  boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0,0,0,0.1)',
+                }}
+              >
+                {/* Click overlay badge */}
+                <div className="absolute top-3 left-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center space-x-1 shadow">
+                  <span>Shop Category</span>
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+
+                {/* 3D Product Image */}
+                <div className="w-full h-64 sm:h-72 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-50/50 p-2">
+                  <motion.img
+                    animate={{
+                      y: [0, -8, 0],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                    src={currentItem.image}
+                    alt={currentItem.title}
+                    className="w-full h-full object-contain drop-shadow-2xl"
+                  />
+                </div>
+
+                {/* Floating Chevron Right Button attached to product frame */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNext();
+                  }}
+                  className="absolute -right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white text-slate-800 shadow-2xl border border-slate-200 flex items-center justify-center transition-all duration-300 hover:scale-115 z-30"
+                  title="Next Category Slide"
+                >
+                  <ChevronRight className="w-5 h-5 text-slate-700" />
+                </button>
+              </div>
+
+              {/* Realistic Floor Shadow under 3D container */}
+              <div
+                className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-4/5 h-6 rounded-full bg-black/40 blur-xl pointer-events-none"
+                style={{ transform: 'scaleY(0.4)' }}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* BOTTOM FOR MOBILE / LEFT FOR DESKTOP: Floating Glassmorphism Product Info Card */}
+        <div className="relative z-20 w-full max-w-sm sm:max-w-md md:max-w-xs shrink-0 order-2 md:order-1">
+          {/* Mobile Only Header */}
+          <div className="md:hidden text-center mb-2">
+            <h4 className="text-lg font-bold text-white tracking-wide">Product Information</h4>
+          </div>
+
           <AnimatePresence mode="wait">
             <motion.div
               key={currentItem.id}
@@ -542,76 +624,6 @@ export const Category3DHero: React.FC = () => {
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Center: 3D Floating Product Showcase with Interactive Tilt */}
-        <div className="relative z-20 flex-1 flex justify-center items-center py-4">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentItem.id}
-              initial={{ opacity: 0, scale: 0.8, rotateY: -25, rotateZ: -5 }}
-              animate={{ opacity: 1, scale: 1, rotateY: mousePos.x * 20 - 6, rotateX: -mousePos.y * 20 + 4, rotateZ: 3 }}
-              exit={{ opacity: 0, scale: 0.85, rotateY: 25, rotateZ: 5 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="relative group cursor-pointer"
-              style={{
-                perspective: '1200px',
-                transformStyle: 'preserve-3d',
-              }}
-              onClick={() => handleCategoryClick(currentItem)}
-              title={`Click to view all ${currentItem.name} products`}
-            >
-              {/* White Framed Floating Container with Perspective Shadow */}
-              <div
-                className="relative bg-white rounded-2xl p-4 sm:p-6 shadow-[0_30px_70px_rgba(0,0,0,0.4)] border border-white/80 transition-transform duration-300 group-hover:scale-105"
-                style={{
-                  transform: 'rotate(4deg)',
-                  boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0,0,0,0.1)',
-                }}
-              >
-                {/* Click overlay badge */}
-                <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center space-x-1 shadow">
-                  <span>Shop Category</span>
-                  <ArrowRight className="w-3 h-3" />
-                </div>
-
-                {/* 3D Product Image */}
-                <div className="w-56 h-56 sm:w-72 sm:h-72 flex items-center justify-center overflow-hidden rounded-xl">
-                  <motion.img
-                    animate={{
-                      y: [0, -8, 0],
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                    src={currentItem.image}
-                    alt={currentItem.title}
-                    className="w-full h-full object-contain drop-shadow-2xl"
-                  />
-                </div>
-
-                {/* Floating Chevron Right Button attached to product frame */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNext();
-                  }}
-                  className="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-800 shadow-xl border border-slate-200 flex items-center justify-center transition-all duration-300 hover:scale-115 z-30"
-                  title="Next Category Slide"
-                >
-                  <ChevronRight className="w-5 h-5 text-slate-700" />
-                </button>
-              </div>
-
-              {/* Realistic Floor Shadow under 3D container */}
-              <div
-                className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-4/5 h-6 rounded-full bg-black/40 blur-xl pointer-events-none"
-                style={{ transform: 'scaleY(0.4)' }}
-              />
             </motion.div>
           </AnimatePresence>
         </div>
