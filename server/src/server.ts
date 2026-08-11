@@ -31,10 +31,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect Database & Firebase
-connectDB();
-initFirebaseAdmin();
-
 // Global Middleware
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
@@ -89,8 +85,19 @@ app.get('/api/health', (_req, res) => {
 // Global Error Handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`\n==================================================`);
-  console.log(`🚀 MANIVYA REST API Server running on port ${PORT}`);
-  console.log(`==================================================\n`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    initFirebaseAdmin();
+  } catch (err) {
+    console.error('[Server Startup Warning]', (err as Error).message);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`\n==================================================`);
+    console.log(`🚀 MANIVYA REST API Server running on port ${PORT}`);
+    console.log(`==================================================\n`);
+  });
+};
+
+startServer();

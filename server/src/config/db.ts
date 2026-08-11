@@ -19,7 +19,8 @@ export const connectDB = async () => {
       } catch (e) {}
     }
 
-    const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/manivya';
+    const rawUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/manivya';
+    const connStr = rawUri.replace(/^["']|["']$/g, '').trim();
     const maskedUri = connStr.replace(/:([^@]+)@/, ':****@');
     console.log(`[MongoDB Atlas] Attempting connection with URI: ${maskedUri}`);
 
