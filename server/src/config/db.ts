@@ -34,5 +34,6 @@ export const connectDB = async () => {
     isDbConnected = false;
     lastDbError = (error as Error).message;
     console.error(`[MongoDB Atlas] Connection Error: ${lastDbError}`);
+    throw new Error(`Database Connection Failed: ${lastDbError}`);
   }
 };
