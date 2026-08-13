@@ -52,15 +52,20 @@ export const createAddress = async (req: AuthRequest, res: Response) => {
 
 export const updateAddress = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) return sendError(res, 'Unauthorized', 401);
     const { id } = req.params;
     const { isDefault } = req.body;
 
-    if (isDefault && req.user) {
+    if (isDefault) {
       await Address.updateMany({ user: req.user._id }, { isDefault: false });
     }
 
-    const address = await Address.findByIdAndUpdate(id, req.body, { new: true });
-    if (!address) return sendError(res, 'Address not found', 404);
+    const address = await Address.findOneAndUpdate(
+      { _id: id, user: req.user._id },
+      req.body,
+      { new: true }
+    );
+    if (!address) return sendError(res, 'Address not found or access denied', 404);
 
     return sendSuccess(res, address, 'Address updated successfully');
   } catch (err) {
@@ -70,9 +75,10 @@ export const updateAddress = async (req: AuthRequest, res: Response) => {
 
 export const deleteAddress = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) return sendError(res, 'Unauthorized', 401);
     const { id } = req.params;
-    const address = await Address.findByIdAndDelete(id);
-    if (!address) return sendError(res, 'Address not found', 404);
+    const address = await Address.findOneAndDelete({ _id: id, user: req.user._id });
+    if (!address) return sendError(res, 'Address not found or access denied', 404);
 
     return sendSuccess(res, null, 'Address deleted successfully');
   } catch (err) {
@@ -86,7 +92,12 @@ export const setDefaultAddress = async (req: AuthRequest, res: Response) => {
     if (!req.user) return sendError(res, 'Unauthorized', 401);
 
     await Address.updateMany({ user: req.user._id }, { isDefault: false });
-    const address = await Address.findByIdAndUpdate(id, { isDefault: true }, { new: true });
+    const address = await Address.findOneAndUpdate(
+      { _id: id, user: req.user._id },
+      { isDefault: true },
+      { new: true }
+    );
+    if (!address) return sendError(res, 'Address not found or access denied', 404);
 
     return sendSuccess(res, address, 'Default address updated');
   } catch (err) {

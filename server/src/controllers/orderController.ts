@@ -210,10 +210,20 @@ export const getMyOrders = async (req: AuthRequest, res: Response) => {
 
 export const getOrderById = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) return sendError(res, 'Unauthorized', 401);
+
     const { id } = req.params;
     const order = await Order.findById(id).populate('user', 'name email phone');
 
     if (!order) return sendError(res, 'Order not found', 404);
+
+    const orderUserId = (order.user as any)?._id ? (order.user as any)._id.toString() : order.user.toString();
+    const isOwner = orderUserId === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return sendError(res, 'Forbidden: You do not have permission to view this order', 403);
+    }
 
     return sendSuccess(res, order, 'Order details retrieved');
   } catch (err) {
@@ -282,11 +292,20 @@ export const updateOrderStatusAdmin = async (req: AuthRequest, res: Response) =>
 
 export const cancelOrder = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) return sendError(res, 'Unauthorized', 401);
+
     const { id } = req.params;
     const { reason } = req.body;
 
     const order = await Order.findById(id);
     if (!order) return sendError(res, 'Order not found', 404);
+
+    const isOwner = order.user.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return sendError(res, 'Forbidden: You do not have permission to cancel this order', 403);
+    }
 
     if (order.orderStatus === 'Cancelled') {
       return sendError(res, 'Order is already cancelled', 400);

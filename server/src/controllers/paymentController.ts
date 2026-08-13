@@ -16,6 +16,13 @@ export const uploadPaymentProof = async (req: AuthRequest, res: Response) => {
     const order = await Order.findById(orderId);
     if (!order) return sendError(res, 'Order not found', 404);
 
+    const isOwner = order.user.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return sendError(res, 'Forbidden: You do not have permission to upload payment proof for this order', 403);
+    }
+
     let proofImage = '';
     if (file) {
       proofImage = await uploadToCloudinary(file.buffer, 'manivya/payments');
