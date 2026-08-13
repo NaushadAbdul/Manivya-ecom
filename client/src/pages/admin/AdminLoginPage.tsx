@@ -105,19 +105,7 @@ export const AdminLoginPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Quick Demo Fill Button */}
-      {!isRegister && (
-        <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-2xl">
-          <button
-            type="button"
-            onClick={fillQuickAdmin}
-            className="w-full bg-purple-950/40 hover:bg-purple-900/40 text-purple-300 text-[11px] font-bold py-2.5 rounded-xl border border-purple-500/30 transition-all flex items-center justify-center space-x-2"
-          >
-            <ShieldCheck className="w-4 h-4 text-purple-400" />
-            <span>🛡️ Demo Admin</span>
-          </button>
-        </div>
-      )}
+
 
       {/* Error Alert Box */}
       {errorMsg && (
