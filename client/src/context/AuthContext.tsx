@@ -256,8 +256,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         result = await signInWithEmailAndPassword(auth, email, pass);
       } catch (signInErr: any) {
         const code = signInErr?.code || '';
-        if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
-          result = await createUserWithEmailAndPassword(auth, email, pass);
+        if (code === 'auth/user-not-found') {
+          try {
+            result = await createUserWithEmailAndPassword(auth, email, pass);
+          } catch (createErr: any) {
+            if (createErr?.code === 'auth/email-already-in-use') {
+              throw new Error('Email or password is incorrect');
+            }
+            throw createErr;
+          }
+        } else if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+          throw new Error('Email or password is incorrect');
         } else {
           throw signInErr;
         }
