@@ -78,7 +78,12 @@ export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
         'account'
       );
     } else {
-      user.uid = uid; // Ensure Google/Firebase UID is linked
+      if (user.uid !== uid) {
+        const uidTaken = await User.findOne({ uid });
+        if (!uidTaken) {
+          user.uid = uid;
+        }
+      }
       if (isDefinedAdmin) {
         user.role = 'admin';
       }
