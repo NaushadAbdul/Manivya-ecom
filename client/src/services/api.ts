@@ -82,6 +82,8 @@ export const apiService = {
   uploadPaymentProof: (formData: FormData) => api.post('/payments/upload-proof', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   getPendingPaymentsAdmin: () => api.get('/payments/pending'),
   verifyPaymentAdmin: (paymentId: string, action: 'approve' | 'reject', rejectionReason?: string) => api.patch(`/payments/verify/${paymentId}`, { action, rejectionReason }),
+  createRazorpayOrder: (amount: number, orderId?: string) => api.post('/payments/razorpay/create-order', { amount, orderId }),
+  verifyRazorpayPayment: (paymentData: any) => api.post('/payments/razorpay/verify', paymentData),
 
   // Addresses & Geo Location
   getAddresses: () => api.get('/addresses'),

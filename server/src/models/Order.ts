@@ -30,7 +30,7 @@ export interface IOrder extends Document {
     latitude?: number;
     longitude?: number;
   };
-  paymentMethod: 'cod' | 'qr_code';
+  paymentMethod: 'cod' | 'qr_code' | 'razorpay';
   paymentInfo: {
     status: 'Pending' | 'Verified' | 'Rejected' | 'Paid';
     transactionId?: string;
@@ -94,7 +94,7 @@ const OrderSchema: Schema = new Schema(
       latitude: { type: Number },
       longitude: { type: Number },
     },
-    paymentMethod: { type: String, enum: ['cod', 'qr_code'], required: true },
+    paymentMethod: { type: String, enum: ['cod', 'qr_code', 'razorpay'], required: true },
     paymentInfo: {
       status: { type: String, enum: ['Pending', 'Verified', 'Rejected', 'Paid'], default: 'Pending' },
       transactionId: { type: String, default: '' },

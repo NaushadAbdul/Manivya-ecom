@@ -17,7 +17,7 @@ export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(currentLocation);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'qr_code'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'qr_code' | 'razorpay'>('razorpay');
   const [transactionId, setTransactionId] = useState<string>('');
   const [placingOrder, setPlacingOrder] = useState(false);
 
@@ -26,6 +26,119 @@ export const CheckoutPage: React.FC = () => {
   const [isQRVerified, setIsQRVerified] = useState(false);
 
   const grandTotal = Math.max(0, subtotal - couponDiscount + shippingInfo.shippingFee);
+
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleRazorpayPayment = async () => {
+    if (!user) {
+      toast.error('Please login to complete checkout');
+      navigate('/auth');
+      return;
+    }
+
+    const finalAddress = selectedAddress || currentLocation;
+    if (!finalAddress || !finalAddress.fullAddress) {
+      toast.error('Please select or fill in a valid shipping address.');
+      return;
+    }
+
+    try {
+      setPlacingOrder(true);
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error('Failed to load Razorpay SDK. Please check your internet connection.');
+        setPlacingOrder(false);
+        return;
+      }
+
+      // Create Razorpay order on backend
+      const rzpOrderRes = await apiService.createRazorpayOrder(grandTotal);
+      const rzpData = rzpOrderRes.data.data;
+
+      const options = {
+        key: rzpData.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+        amount: rzpData.amount,
+        currency: rzpData.currency || 'INR',
+        name: 'MANIVYA Enterprises',
+        description: 'E-Commerce Online Order Payment',
+        order_id: rzpData.id.startsWith('rzp_order_') ? undefined : rzpData.id,
+        handler: async function (response: any) {
+          try {
+            toast.loading('Payment received! Finalizing your order...');
+            const itemsPayload = cart.map((i) => ({
+              product: i.product._id,
+              name: i.product.name,
+              slug: i.product.slug,
+              quantity: i.quantity,
+            }));
+
+            const orderRes = await apiService.createOrder({
+              items: itemsPayload,
+              shippingAddress: finalAddress,
+              paymentMethod: 'razorpay',
+              discountAmount: couponDiscount,
+              transactionId: response.razorpay_payment_id || `rzp_${Date.now()}`,
+            });
+
+            if (orderRes.data.success) {
+              const createdOrder = orderRes.data.data;
+              await apiService.verifyRazorpayPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: createdOrder._id,
+              });
+
+              clearCart();
+              toast.dismiss();
+              toast.success(`Payment verified! Order #${createdOrder.orderNumber} placed successfully.`);
+              navigate(`/orders/${createdOrder._id}`);
+            }
+          } catch (err: any) {
+            toast.dismiss();
+            toast.error(err.response?.data?.error || 'Failed to finalize order after payment.');
+          } finally {
+            setPlacingOrder(false);
+          }
+        },
+        prefill: {
+          name: user.name || '',
+          email: user.email || '',
+          contact: user.phone || '',
+        },
+        notes: {
+          address: finalAddress.fullAddress,
+        },
+        theme: {
+          color: '#6366f1',
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error('Payment cancelled.');
+            setPlacingOrder(false);
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Razorpay order creation failed.');
+      setPlacingOrder(false);
+    }
+  };
 
   const executePlaceOrder = async (txId?: string) => {
     if (!user) {
@@ -74,6 +187,11 @@ export const CheckoutPage: React.FC = () => {
     const finalAddress = selectedAddress || currentLocation;
     if (!finalAddress || !finalAddress.fullAddress) {
       toast.error('Please select or fill in a valid shipping address.');
+      return;
+    }
+
+    if (paymentMethod === 'razorpay') {
+      handleRazorpayPayment();
       return;
     }
 
@@ -166,10 +284,12 @@ export const CheckoutPage: React.FC = () => {
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all disabled:opacity-50"
             >
               {placingOrder
-                ? 'Confirming Order...'
+                ? 'Processing Payment & Order...'
+                : paymentMethod === 'razorpay'
+                ? 'Pay via Razorpay & Place Order'
                 : paymentMethod === 'qr_code' && !isQRVerified
                 ? 'Pay via QR Code & Order'
-                : 'Place Order Now'}
+                : 'Place Order Now (COD)'}
             </button>
           </div>
         </div>
