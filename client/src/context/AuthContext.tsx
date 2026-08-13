@@ -250,56 +250,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginAdminWithEmail = async (email: string, pass: string) => {
     try {
       setLoading(true);
-      const cleanEmail = email.toLowerCase().trim();
 
-      // Check designated passwords for main admin accounts
-      const isMainAdminPass =
-        (cleanEmail === 'mme27082018@gmail.com' && pass === 'manivya123#') ||
-        (cleanEmail === 'admin@manivya.com' && pass === 'admin123#') ||
-        (cleanEmail === 'naushadabdul2006@gmail.com' && (pass === 'admin123#' || pass === 'manivya123#'));
-
-      let idToken = '';
-      let userEmail = cleanEmail;
-      let uid = '';
-      let name = cleanEmail.split('@')[0];
-
+      let result;
       try {
-        const result = await signInWithEmailAndPassword(auth, cleanEmail, pass);
-        idToken = await result.user.getIdToken();
-        userEmail = result.user.email || cleanEmail;
-        uid = result.user.uid;
-        name = result.user.displayName || userEmail.split('@')[0];
+        result = await signInWithEmailAndPassword(auth, email, pass);
       } catch (signInErr: any) {
         const code = signInErr?.code || '';
-        if (code === 'auth/user-not-found') {
-          try {
-            const createRes = await createUserWithEmailAndPassword(auth, cleanEmail, pass);
-            idToken = await createRes.user.getIdToken();
-            userEmail = createRes.user.email || cleanEmail;
-            uid = createRes.user.uid;
-            name = createRes.user.displayName || userEmail.split('@')[0];
-          } catch (createErr: any) {
-            if (isMainAdminPass) {
-              idToken = `dev-token-admin-${cleanEmail}`;
-              uid = `admin_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '')}`;
-            } else {
-              throw new Error('Email or password is incorrect');
-            }
-          }
-        } else if (isMainAdminPass) {
-          idToken = `dev-token-admin-${cleanEmail}`;
-          uid = `admin_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '')}`;
+        if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+          result = await createUserWithEmailAndPassword(auth, email, pass);
         } else {
-          throw new Error('Email or password is incorrect');
+          throw signInErr;
         }
       }
 
+      const userEmail = result.user.email || email;
+      const idToken = await result.user.getIdToken();
+
       let adminData: User = {
-        _id: uid,
-        uid: uid,
-        name: name || 'MANIVYA Admin',
+        _id: result.user.uid,
+        uid: result.user.uid,
+        name: result.user.displayName || userEmail.split('@')[0] || 'MANIVYA Admin',
         email: userEmail,
-        photo: '',
+        photo: result.user.photoURL || '',
         provider: 'password',
         role: 'admin',
         status: 'active',
@@ -311,8 +283,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         const syncRes = await apiService.syncUser({
-          uid: uid,
-          name: name || userEmail.split('@')[0],
+          uid: result.user.uid,
+          name: result.user.displayName || userEmail.split('@')[0],
           email: userEmail,
           provider: 'password',
           isAdminPortal: true,

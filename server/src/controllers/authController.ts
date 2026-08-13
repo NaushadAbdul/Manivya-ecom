@@ -53,18 +53,26 @@ export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
 
     const isDefinedAdmin = isDefinedAdminEmail(normalizedEmail);
 
-    if (isAdminPortal && !isDefinedAdmin) {
-      return sendError(res, 'Access Denied: This email is not authorized for Administrator access.', 403);
+    // If request originates from Admin Portal login, verify admin authorization
+    if (isAdminPortal) {
+      const isAuthorizedAdmin = isDefinedAdmin || (user && user.role === 'admin');
+      if (!isAuthorizedAdmin) {
+        return sendError(
+          res,
+          `Access Denied: The account (${normalizedEmail || uid}) does not have administrator privileges.`,
+          403
+        );
+      }
     }
 
     if (!user) {
       const initialRole = isDefinedAdmin ? 'admin' : 'customer';
       user = await User.create({
         uid,
-        name: name || normalizedEmail.split('@')[0] || 'Valued User',
+        name: name || normalizedEmail.split('@')[0] || 'Valued Customer',
         email: normalizedEmail,
         photo: photo || '',
-        provider: provider || 'password',
+        provider: provider || 'google',
         role: initialRole,
         lastLogin: new Date(),
       });
@@ -72,19 +80,12 @@ export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
       await NotificationService.sendNotification(
         user._id.toString(),
         'Welcome to MANIVYA Enterprises!',
-        initialRole === 'admin'
-          ? 'Your Administrator Partner account has been successfully initialized.'
-          : 'Thank you for registering. Explore our premium catalog and enjoy special perks.',
+        'Thank you for registering. Explore our premium AI-curated catalog and enjoy special welcoming perks.',
         'account'
       );
     } else {
-      if (user.uid !== uid) {
-        const uidTaken = await User.findOne({ uid });
-        if (!uidTaken) {
-          user.uid = uid;
-        }
-      }
-      if (isDefinedAdmin) {
+      user.uid = uid; // Ensure Google UID is linked
+      if (isDefinedAdmin && user.role !== 'admin') {
         user.role = 'admin';
       }
       user.lastLogin = new Date();
