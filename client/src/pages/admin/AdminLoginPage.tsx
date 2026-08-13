@@ -5,23 +5,13 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export const AdminLoginPage: React.FC = () => {
-  const { adminUser, user, loginAdminWithEmail, loginAdminWithGoogle, loading } = useAuth();
+  const { adminUser, user, loginAdminWithEmail, loading } = useAuth();
   const navigate = useNavigate();
 
-  const [isRegister, setIsRegister] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('naushadabdul2006@gmail.com');
+  const [email, setEmail] = useState('mme27082018@gmail.com');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
-
-  const fillQuickAdmin = () => {
-    setEmail('admin@manivya.com');
-    setPassword('admin123');
-    setIsRegister(false);
-    setErrorMsg('');
-    setUnverifiedEmail(null);
-  };
 
   // If already logged in as admin, redirect directly to admin dashboard
   React.useEffect(() => {
@@ -101,23 +91,9 @@ export const AdminLoginPage: React.FC = () => {
         </div>
         <h1 className="text-2xl font-extrabold text-white tracking-tight">MANIVYA Admin Portal</h1>
         <p className="text-xs text-slate-400">
-          {isRegister ? 'Create New Administrator Account' : 'Secure Access for Platform Management & System Operations'}
+          Secure Access for Platform Management & System Operations
         </p>
       </div>
-
-      {/* Quick Demo Fill Button */}
-      {!isRegister && (
-        <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-2xl">
-          <button
-            type="button"
-            onClick={fillQuickAdmin}
-            className="w-full bg-purple-950/40 hover:bg-purple-900/40 text-purple-300 text-[11px] font-bold py-2.5 rounded-xl border border-purple-500/30 transition-all flex items-center justify-center space-x-2"
-          >
-            <ShieldCheck className="w-4 h-4 text-purple-400" />
-            <span>🛡️ Demo Admin</span>
-          </button>
-        </div>
-      )}
 
       {/* Error Alert Box */}
       {errorMsg && (
@@ -134,30 +110,13 @@ export const AdminLoginPage: React.FC = () => {
       <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-5 shadow-2xl">
         {/* Email & Password Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isRegister && (
-            <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Administrator Name</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  placeholder="Rahul Sharma"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 pl-9 text-xs text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-all"
-                />
-                <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-              </div>
-            </div>
-          )}
-
           <div>
             <label className="text-xs font-semibold text-slate-400 block mb-1">Email Address</label>
             <div className="relative">
               <input
                 type="email"
                 required
-                placeholder="admin@manivya.com"
+                placeholder="mme27082018@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 pl-9 text-xs text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-all"
@@ -186,23 +145,9 @@ export const AdminLoginPage: React.FC = () => {
             disabled={loading}
             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs py-3 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all cursor-pointer"
           >
-            {isRegister ? 'Create Admin Account' : 'Sign In'}
+            Sign In
           </button>
         </form>
-
-        {/* Bottom Toggle Link */}
-        <div className="text-center pt-2">
-          <button
-            type="button"
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setErrorMsg('');
-            }}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer transition-colors"
-          >
-            {isRegister ? 'Already have an account? Sign In' : 'Need an account? Register Now'}
-          </button>
-        </div>
       </div>
     </div>
   );
