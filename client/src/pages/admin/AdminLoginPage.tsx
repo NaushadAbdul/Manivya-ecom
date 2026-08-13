@@ -121,7 +121,7 @@ export const AdminLoginPage: React.FC = () => {
       {/* Main Authentication Card */}
       <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-5 shadow-2xl">
         {/* Email & Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           {isRegister && (
             <div>
               <label className="text-xs font-semibold text-slate-400 block mb-1">Administrator Name</label>
@@ -133,6 +133,7 @@ export const AdminLoginPage: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 pl-9 text-xs text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-all"
+                  autoComplete="off"
                 />
                 <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
               </div>
@@ -145,6 +146,8 @@ export const AdminLoginPage: React.FC = () => {
               <input
                 type="email"
                 required
+                name="admin_email_no_autofill"
+                autoComplete="off"
                 placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -160,6 +163,8 @@ export const AdminLoginPage: React.FC = () => {
               <input
                 type="password"
                 required
+                name="admin_pass_no_autofill"
+                autoComplete="new-password"
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
