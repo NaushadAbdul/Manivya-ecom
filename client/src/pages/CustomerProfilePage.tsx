@@ -113,7 +113,7 @@ export const CustomerProfilePage: React.FC = () => {
       </div>
 
       {/* Portal Tabs Navigation */}
-      <div className="flex border-b border-slate-800 space-x-6 text-xs font-semibold overflow-x-auto">
+      <div className="flex border-b border-slate-800 space-x-6 text-xs font-semibold overflow-x-auto no-scrollbar whitespace-nowrap">
         <Link
           to="/profile?tab=orders"
           className={`pb-3 border-b-2 flex items-center space-x-2 transition-all ${

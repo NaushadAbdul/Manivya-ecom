@@ -414,7 +414,7 @@ export const Category3DHero: React.FC<Category3DHeroProps> = ({ onExploreCategor
       {/* Top Header Bar */}
       <header className="relative z-30 w-full max-w-7xl mx-auto px-6 pt-6 pb-4 flex items-center justify-between border-b border-white/10">
         {/* Top Category Sub-Navigation Tabs with Ultra-Sleek Hover & Active Indicator Effects */}
-        <nav className="flex items-center space-x-2 text-xs font-extrabold tracking-widest uppercase overflow-x-auto py-1">
+        <nav className="flex items-center space-x-2 text-xs font-extrabold tracking-widest uppercase overflow-x-auto no-scrollbar flex-nowrap py-1">
           {items.map((item, idx) => {
             const isActive = activeIndex === idx;
             return (
