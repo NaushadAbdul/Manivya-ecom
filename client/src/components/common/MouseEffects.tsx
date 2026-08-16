@@ -45,14 +45,30 @@ export const MouseEffects: React.FC<Props> = ({
     const [snipers, setSnipers] = useState<Effect[]>([]);
 
     useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            const container = containerRef.current;
-            if (!container) return;
+        let lastTriggerTime = 0;
 
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const id = `${e.timeStamp}-${Math.round(x)}-${Math.round(y)}`;
+        const handleInteraction = (e: MouseEvent | TouchEvent) => {
+            const now = performance.now();
+            // Debounce rapid duplicate events (e.g. pointerdown followed immediately by click)
+            if (now - lastTriggerTime < 50) return;
+            lastTriggerTime = now;
+
+            let clientX = 0;
+            let clientY = 0;
+
+            if ('touches' in e && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if ('clientX' in e) {
+                clientX = (e as MouseEvent).clientX;
+                clientY = (e as MouseEvent).clientY;
+            } else {
+                return;
+            }
+
+            const x = clientX;
+            const y = clientY;
+            const id = `${now}-${Math.round(x)}-${Math.round(y)}-${Math.random()}`;
 
             if (interactionMode === "rings") {
                 setRings((prev) => [...prev, { id, x, y }]);
@@ -81,8 +97,13 @@ export const MouseEffects: React.FC<Props> = ({
             }
         };
 
-        document.addEventListener("click", handleClick);
-        return () => document.removeEventListener("click", handleClick);
+        // Attach with capture: true so clicks on ANY element (buttons, cards, links, inputs) trigger the effect
+        window.addEventListener("pointerdown", handleInteraction, { capture: true });
+        window.addEventListener("click", handleInteraction, { capture: true });
+        return () => {
+            window.removeEventListener("pointerdown", handleInteraction, { capture: true });
+            window.removeEventListener("click", handleInteraction, { capture: true });
+        };
     }, [interactionMode, effectSize]);
 
     const svgStyle = (x: number, y: number): CSSProperties => ({
