@@ -81,19 +81,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       let offsetX = 0;
       let offsetY = 0;
 
-      // On portrait mobile screens (screenAspect < imgAspect), use CONTAIN mode
-      // so the entire "MANIVYA" logo fits fully within the mobile screen width without side-cropping!
-      if (screenAspect < imgAspect) {
-        drawW = displayWidth;
+      if (screenAspect > imgAspect) {
         drawH = displayWidth / imgAspect;
-        offsetX = 0;
         offsetY = (displayHeight - drawH) / 2;
       } else {
-        // On widescreen desktop monitors, fill height and center horizontally
-        drawH = displayHeight;
         drawW = displayHeight * imgAspect;
         offsetX = (displayWidth - drawW) / 2;
-        offsetY = 0;
       }
 
       ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
