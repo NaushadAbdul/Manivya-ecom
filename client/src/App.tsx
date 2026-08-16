@@ -77,7 +77,6 @@ const StorefrontLayout: React.FC<{ splashDone: boolean; onSplashComplete: () => 
           </Routes>
         </main>
         <Footer />
-        <AIChatbot />
       </div>
     </>
   );
@@ -101,6 +100,10 @@ export const App: React.FC = () => {
         <LocationProvider>
           <CartProvider>
             <Toaster position="top-right" toastOptions={{ style: { background: '#131B2E', color: '#fff', border: '1px solid #2A3654' } }} />
+            
+            {/* Sticky Global AI Chatbot Concierge - Visible Everywhere */}
+            <AIChatbot />
+
             <Routes>
               {/* Dedicated Admin Login Route */}
               <Route path="/manivya-admin/login" element={<AdminLoginPage />} />

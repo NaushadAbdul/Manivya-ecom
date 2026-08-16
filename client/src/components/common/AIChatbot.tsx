@@ -170,7 +170,7 @@ export const AIChatbot: React.FC = () => {
   return (
     <>
       {/* Floating Spherical Bot Button at Bottom Right */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center space-x-3">
+      <div className="fixed bottom-6 right-6 z-[9999] flex items-center space-x-3">
         {!isOpen && (
           <div className="hidden sm:flex items-center space-x-2 bg-slate-900/90 backdrop-blur-md border border-slate-800 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-full shadow-2xl animate-bounce">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
@@ -201,7 +201,7 @@ export const AIChatbot: React.FC = () => {
 
       {/* Floating Interactive Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-20 sm:bottom-24 right-3 sm:right-6 z-50 w-[calc(100vw-24px)] sm:w-96 max-h-[80vh] h-[500px] bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn">
+        <div className="fixed bottom-20 sm:bottom-24 right-3 sm:right-6 z-[9999] w-[calc(100vw-24px)] sm:w-96 max-h-[80vh] h-[500px] bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn">
           {/* Chat Window Header */}
           <div className="bg-gradient-to-r from-indigo-900/80 via-slate-900 to-purple-900/80 p-4 border-b border-slate-800 flex justify-between items-center">
             <div className="flex items-center space-x-3">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Truck, RotateCcw, Headphones, Send } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, Headphones } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -59,20 +59,6 @@ export const Footer: React.FC = () => {
           <p className="text-xs leading-relaxed text-slate-400 max-w-sm">
             MANIVYA Enterprises is a premier AI-driven e-commerce platform offering luxury tech, smart living appliances, designer fashion, and instant location-aware delivery.
           </p>
-
-          <div className="pt-2">
-            <p className="text-xs font-semibold text-slate-200 mb-2">Subscribe to Exclusive VIP Offers</p>
-            <div className="flex max-w-sm">
-              <input
-                type="email"
-                placeholder="Enter your email..."
-                className="bg-slate-900 border border-slate-800 rounded-l-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 flex-1"
-              />
-              <button className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 rounded-r-xl transition-colors flex items-center gap-1">
-                <Send className="w-3.5 h-3.5" /> Join
-              </button>
-            </div>
-          </div>
         </div>
 
         <div>
@@ -99,16 +85,13 @@ export const Footer: React.FC = () => {
         <div>
           <h5 className="text-white font-semibold text-xs uppercase tracking-wider mb-4">Support Contact</h5>
           <div className="space-y-2 text-xs">
-            <p><strong className="text-slate-200">Email:</strong> support@manivya.com</p>
-            <p><strong className="text-slate-200">Phone:</strong> +91 (022) 8888-9999</p>
+            <p><strong className="text-slate-200">Email:</strong> mme27082018@gmail.com</p>
+            <p><strong className="text-slate-200">Phone:</strong> +91 7207554777</p>
             <p><strong className="text-slate-200">Corporate HQ & Fulfillment Hub:</strong> 25-1-13, Gajuwaka Bypass Rd, Durgavanipalem, Pedagantyada, Visakhapatnam, Gajuwaka, AP 530026</p>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-slate-900 py-6 text-center text-xs text-slate-400">
-        <p>© 2026 MANIVYA Enterprises. All rights reserved. Built with clean architecture and modern full-stack performance.</p>
-      </div>
     </footer>
   );
 };

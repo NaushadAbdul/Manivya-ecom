@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, Coupon } from '../types';
-import { apiService } from '../services/api';
 import toast from 'react-hot-toast';
 
 export interface CartItem {
@@ -11,7 +10,6 @@ export interface CartItem {
 interface CartContextType {
   cart: CartItem[];
   savedForLater: CartItem[];
-  wishlist: Product[];
   appliedCoupon: Coupon | null;
   couponDiscount: number;
   addToCart: (product: Product, quantity?: number) => void;
@@ -19,8 +17,6 @@ interface CartContextType {
   removeFromCart: (productId: string) => void;
   moveToSavedForLater: (productId: string) => void;
   moveToCartFromSaved: (productId: string) => void;
-  toggleWishlist: (product: Product) => void;
-  isInWishlist: (productId: string) => boolean;
   applyCoupon: (coupon: Coupon, discount: number) => void;
   removeCoupon: () => void;
   clearCart: () => void;
@@ -41,11 +37,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [wishlist, setWishlist] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('manivya_wishlist');
-    return saved ? JSON.parse(saved) : [];
-  });
-
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
@@ -56,22 +47,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('manivya_saved_later', JSON.stringify(savedForLater));
   }, [savedForLater]);
-
-  useEffect(() => {
-    localStorage.setItem('manivya_wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
-
-  // Sync Wishlist from MongoDB Atlas Cloud
-  useEffect(() => {
-    const token = localStorage.getItem('manivya_token');
-    if (token) {
-      apiService.getWishlist().then((res) => {
-        if (res.data && res.data.success && Array.isArray(res.data.data)) {
-          setWishlist(res.data.data);
-        }
-      }).catch(() => {});
-    }
-  }, []);
 
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
@@ -120,30 +95,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const toggleWishlist = async (product: Product) => {
-    const exists = wishlist.some((p) => p._id === product._id);
-    if (exists) {
-      setWishlist((prev) => prev.filter((p) => p._id !== product._id));
-      toast.success(`Removed ${product.name} from wishlist`);
-    } else {
-      setWishlist((prev) => [...prev, product]);
-      toast.success(`Saved ${product.name} to wishlist!`);
-    }
-
-    try {
-      const res = await apiService.toggleWishlistApi(product._id);
-      if (res.data && res.data.success && Array.isArray(res.data.data.products)) {
-        setWishlist(res.data.data.products);
-      }
-    } catch (err) {
-      console.warn('Local wishlist fallback notice');
-    }
-  };
-
-  const isInWishlist = (productId: string) => {
-    return wishlist.some((p) => p._id === productId);
-  };
-
   const applyCoupon = (coupon: Coupon, discount: number) => {
     setAppliedCoupon(coupon);
     setCouponDiscount(discount);
@@ -170,7 +121,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         cart,
         savedForLater,
-        wishlist,
         appliedCoupon,
         couponDiscount,
         addToCart,
@@ -178,8 +128,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeFromCart,
         moveToSavedForLater,
         moveToCartFromSaved,
-        toggleWishlist,
-        isInWishlist,
         applyCoupon,
         removeCoupon,
         clearCart,

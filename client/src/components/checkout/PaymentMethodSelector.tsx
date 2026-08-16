@@ -99,20 +99,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         </div>
       </div>
 
-      {/* Razorpay Information Card */}
-      {paymentMethod === 'razorpay' && (
-        <div className="p-4 bg-purple-950/40 border border-purple-500/30 rounded-2xl flex items-center space-x-3 text-xs">
-          <div className="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="font-bold text-white block">Razorpay Secure 256-Bit Encrypted Payment</span>
-            <span className="text-slate-300 text-[11px] block">
-              When you click "Pay via Razorpay & Place Order", Razorpay payment popup will open automatically. Order is placed once payment is confirmed.
-            </span>
-          </div>
-        </div>
-      )}
+
 
       {/* QR Code Banner Status Card */}
       {paymentMethod === 'qr_code' && (

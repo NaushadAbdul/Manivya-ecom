@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, ShoppingBag, Heart, Share2, ShieldCheck, Truck, RotateCcw, ThumbsUp, Sparkles, MessageSquare } from 'lucide-react';
+import { Star, ShoppingBag, Share2, ShieldCheck, Truck, RotateCcw, ThumbsUp, Sparkles, MessageSquare } from 'lucide-react';
 import { ImageGalleryZoom } from '../components/product/ImageGalleryZoom';
 import { ProductGrid } from '../components/product/ProductGrid';
 import { apiService } from '../services/api';
@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 export const ProductDetailPage: React.FC = () => {
   const { identifier } = useParams<{ identifier: string }>();
-  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { addToCart } = useCart();
   const { user } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -94,8 +94,6 @@ export const ProductDetailPage: React.FC = () => {
     );
   }
 
-  const inWishlist = isInWishlist(product._id);
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-16">
       {/* Product Overview Section */}
@@ -167,21 +165,6 @@ export const ProductDetailPage: React.FC = () => {
             >
               <ShoppingBag className="w-5 h-5" />
               <span>Add to Shopping Cart</span>
-            </button>
-
-            <button
-              onClick={() => {
-                toggleWishlist(product);
-                apiService.logProductActivity(product._id, 'wishlist_add').catch(() => {});
-              }}
-              className={`p-3.5 rounded-2xl border transition-all ${
-                inWishlist
-                  ? 'bg-rose-500 text-white border-rose-500'
-                  : 'bg-slate-900 text-slate-300 border-slate-800 hover:text-white'
-              }`}
-              title="Save to Wishlist"
-            >
-              <Heart className={`w-5 h-5 ${inWishlist ? 'fill-white' : ''}`} />
             </button>
 
             <button

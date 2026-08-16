@@ -35,13 +35,6 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  const fillQuickCustomer = () => {
-    setEmail('rahul@example.com');
-    setPassword('customer123');
-    setIsRegister(false);
-    setErrorMsg('');
-    setUnverifiedEmail(null);
-  };
 
   if (unverifiedEmail) {
     return (
@@ -85,20 +78,9 @@ export const AuthPage: React.FC = () => {
         <h1 className="text-2xl font-extrabold text-white">
           {isRegister ? 'Create MANIVYA Account' : 'Welcome Back'}
         </h1>
-        <p className="text-xs text-slate-400">
-          {isRegister ? 'Join our luxury AI shopping ecosystem' : 'Sign in to access your orders and saved recommendations'}
-        </p>
-      </div>
-
-      {/* Quick Demo Fill Button */}
-      <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-2xl">
-        <button
-          type="button"
-          onClick={fillQuickCustomer}
-          className="w-full bg-slate-950 hover:bg-slate-800 text-slate-300 text-[11px] font-bold py-2.5 rounded-xl border border-slate-800 transition-all flex items-center justify-center space-x-1.5"
-        >
-          <span>👤 Fill Demo Customer Credentials</span>
-        </button>
+        {isRegister && (
+          <p className="text-xs text-slate-400">Join our luxury AI shopping ecosystem</p>
+        )}
       </div>
 
       {/* Error Alert Box */}

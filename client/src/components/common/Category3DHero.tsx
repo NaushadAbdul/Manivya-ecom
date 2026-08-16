@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, ChevronRight, ShoppingBag, User as UserIcon, Check, ArrowRight } from 'lucide-react';
+import { ChevronRight, Check, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -213,7 +213,11 @@ const DEFAULT_CATEGORY_ITEMS: CategoryHeroItem[] = [
 
 import { CategoryIntroModal } from './CategoryIntroModal';
 
-export const Category3DHero: React.FC = () => {
+interface Category3DHeroProps {
+  onExploreCategory?: (slug: string) => void;
+}
+
+export const Category3DHero: React.FC<Category3DHeroProps> = ({ onExploreCategory }) => {
   const navigate = useNavigate();
   const [items, setItems] = useState<CategoryHeroItem[]>(DEFAULT_CATEGORY_ITEMS);
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -226,14 +230,19 @@ export const Category3DHero: React.FC = () => {
   const [selectedCategorySlug, setSelectedCategorySlug] = useState('');
   const [selectedIntroVideo, setSelectedIntroVideo] = useState('');
 
-  const { addToCart, totalItemsCount, toggleWishlist, isInWishlist } = useCart();
+  const { addToCart, totalItemsCount } = useCart();
   const { user } = useAuth();
 
   const handleCategoryClick = (item: CategoryHeroItem) => {
-    setSelectedCategoryName(item.name);
-    setSelectedCategorySlug(item.slug || item.name);
-    setSelectedIntroVideo(item.introVideo || '');
-    setIntroModalOpen(true);
+    const slug = item.slug || item.id;
+    if (onExploreCategory) {
+      onExploreCategory(slug);
+    } else {
+      setSelectedCategoryName(item.name);
+      setSelectedCategorySlug(slug);
+      setSelectedIntroVideo(item.introVideo || '');
+      setIntroModalOpen(true);
+    }
   };
 
   // Fetch dynamic 3D hero categories from backend
@@ -279,7 +288,6 @@ export const Category3DHero: React.FC = () => {
   };
 
   const productForCart = getProductForCart(currentItem);
-  const inWishlist = isInWishlist(productForCart._id);
 
   // Parallax tilt logic based on mouse movement
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -405,44 +413,45 @@ export const Category3DHero: React.FC = () => {
 
       {/* Top Header Bar */}
       <header className="relative z-30 w-full max-w-7xl mx-auto px-6 pt-6 pb-4 flex items-center justify-between border-b border-white/10">
-        {/* Brand Name */}
-        <Link to="/" className="flex items-center space-x-2 group">
-          <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-md font-serif">
-            Manivya Mart
-          </span>
-        </Link>
+        {/* Top Category Sub-Navigation Tabs with Ultra-Sleek Hover & Active Indicator Effects */}
+        <nav className="flex items-center space-x-2 text-xs font-extrabold tracking-widest uppercase overflow-x-auto py-1">
+          {items.map((item, idx) => {
+            const isActive = activeIndex === idx;
+            return (
+              <button
+                key={item.id || idx}
+                onClick={() => setActiveIndex(idx)}
+                onMouseEnter={() => setActiveIndex(idx)}
+                className={`relative px-4 py-2 rounded-full transition-all duration-300 cursor-pointer group flex items-center space-x-1.5 shrink-0 ${
+                  isActive
+                    ? 'text-white font-black bg-white/25 border border-white/40 shadow-[0_0_25px_rgba(255,255,255,0.35)] scale-105 backdrop-blur-md'
+                    : 'text-white/70 hover:text-white hover:bg-white/15 hover:border-white/25 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] border border-transparent'
+                }`}
+              >
+                {/* Active Sliding Glowing Pill Indicator */}
+                {isActive && (
+                  <motion.div
+                    layoutId="heroTabActiveIndicator"
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/30 to-white/20 rounded-full border border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.4)] pointer-events-none"
+                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                  />
+                )}
 
-        {/* Top Category Sub-Navigation Tabs */}
-        <nav className="hidden md:flex items-center space-x-8 text-xs font-bold tracking-widest uppercase text-white/80">
-          <button onClick={() => setActiveIndex(0)} className="hover:text-white transition-colors cursor-pointer">
-            PRODUCE
-          </button>
-          <button onClick={() => setActiveIndex(2)} className="hover:text-white transition-colors cursor-pointer">
-            BAKERY
-          </button>
-          <button onClick={() => setActiveIndex(0)} className="border-b-2 border-white pb-0.5 text-white font-extrabold cursor-pointer">
-            GOURMET
-          </button>
-          <button onClick={() => setActiveIndex(1)} className="hover:text-white transition-colors cursor-pointer">
-            CELLAR
-          </button>
+                <span className="relative z-10 drop-shadow transition-transform group-hover:scale-105">
+                  {item.name}
+                </span>
+
+                {/* Animated underline beam indicator */}
+                <span
+                  className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-white transition-all duration-300 ${
+                    isActive ? 'opacity-100 scale-x-100 shadow-[0_0_8px_#ffffff]' : 'opacity-0 scale-x-0 group-hover:opacity-80 group-hover:scale-x-100'
+                  }`}
+                />
+              </button>
+            );
+          })}
         </nav>
 
-        {/* Right Header Actions */}
-        <div className="flex items-center space-x-5 text-white">
-          <Link to="/cart" className="relative p-1.5 hover:opacity-80 transition-opacity" title="Shopping Cart">
-            <ShoppingBag className="w-5 h-5 drop-shadow" />
-            {totalItemsCount > 0 && (
-              <span className="absolute -top-1 -right-1.5 bg-white text-slate-900 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow">
-                {totalItemsCount}
-              </span>
-            )}
-          </Link>
-
-          <Link to={user ? "/profile" : "/auth"} className="p-1.5 hover:opacity-80 transition-opacity" title="Account">
-            <UserIcon className="w-5 h-5 drop-shadow" />
-          </Link>
-        </div>
       </header>
 
       {/* Main Content Area */}
@@ -587,7 +596,7 @@ export const Category3DHero: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={handleAddToCart}
-                    className="flex-1 text-white font-bold text-xs sm:text-sm py-3 px-5 rounded-full shadow-xl transition-all duration-300 transform active:scale-95 flex items-center justify-center space-x-2"
+                    className="w-full text-white font-bold text-xs sm:text-sm py-3 px-5 rounded-full shadow-xl transition-all duration-300 transform active:scale-95 flex items-center justify-center space-x-2"
                     style={{
                       background: currentItem.buttonBg || '#7c2d12',
                       boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)',
@@ -601,18 +610,6 @@ export const Category3DHero: React.FC = () => {
                     ) : (
                       <span>Add to Cart - {currentItem.priceDisplay}</span>
                     )}
-                  </button>
-
-                  <button
-                    onClick={() => toggleWishlist(productForCart)}
-                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 border shadow-lg ${
-                      inWishlist
-                        ? 'bg-rose-500 text-white border-rose-400 scale-110'
-                        : 'bg-white/80 hover:bg-white text-slate-700 border-white/60'
-                    }`}
-                    title="Wishlist"
-                  >
-                    <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
                   </button>
                 </div>
 

@@ -145,11 +145,6 @@ export const apiService = {
     api.patch(`/auth/users/${userId}/block`, { status, blockedReason }),
   cancelOrder: (orderId: string, reason?: string) => api.post(`/orders/${orderId}/cancel`, { reason }),
 
-  // Wishlist Cloud Sync
-  getWishlist: () => api.get('/wishlist'),
-  toggleWishlistApi: (productId: string) => api.post('/wishlist/toggle', { productId }),
-  clearWishlistApi: () => api.delete('/wishlist'),
-
   // Hero Showcase Slides (admin configurable)
   getShowcase: () => api.get('/showcase'),
   updateShowcase: (slides: any[]) => api.put('/showcase', { slides }),

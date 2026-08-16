@@ -67,7 +67,20 @@ const PRESET_GRADIENTS = [
   },
 ];
 
+const toHexColor = (val?: string, fallback = '#ffffff') => {
+  if (!val) return fallback;
+  const cleaned = val.trim();
+  if (/^#([0-9A-F]{3}){1,2}$/i.test(cleaned)) {
+    if (cleaned.length === 4) {
+      return `#${cleaned[1]}${cleaned[1]}${cleaned[2]}${cleaned[2]}${cleaned[3]}${cleaned[3]}`;
+    }
+    return cleaned;
+  }
+  return fallback;
+};
+
 const FONT_COLOR_PALETTES = [
+  { name: 'Classic White & Black', navText: '#ffffff', navAccent: '#ffffff', bodyText: '#ffffff' },
   { name: 'Pure White & Gold', navText: '#ffffff', navAccent: '#fbbf24', bodyText: '#f8fafc' },
   { name: 'Cyber Neon Cyan', navText: '#e0f2fe', navAccent: '#38bdf8', bodyText: '#f0f9ff' },
   { name: 'Emerald Mint', navText: '#ecfdf5', navAccent: '#34d399', bodyText: '#f0fdf4' },
@@ -356,40 +369,58 @@ export const AdminThemePage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="text-xs font-semibold text-slate-400 block mb-1.5">Navbar Text Color</label>
-            <div className="flex items-center space-x-3 bg-slate-950 border border-slate-800 rounded-xl p-2">
+            <div className="flex items-center space-x-2 bg-slate-950 border border-slate-800 rounded-xl p-2">
               <input
                 type="color"
+                value={toHexColor(navbarTextColor, '#ffffff')}
+                onChange={(e) => setNavbarTextColor(e.target.value)}
+                className="w-9 h-9 rounded-lg cursor-pointer bg-transparent border-0 shrink-0"
+              />
+              <input
+                type="text"
                 value={navbarTextColor}
                 onChange={(e) => setNavbarTextColor(e.target.value)}
-                className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
+                placeholder="#ffffff"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
               />
-              <span className="text-xs font-mono text-white">{navbarTextColor}</span>
             </div>
           </div>
 
           <div>
             <label className="text-xs font-semibold text-slate-400 block mb-1.5">Navbar Accent / Link Color</label>
-            <div className="flex items-center space-x-3 bg-slate-950 border border-slate-800 rounded-xl p-2">
+            <div className="flex items-center space-x-2 bg-slate-950 border border-slate-800 rounded-xl p-2">
               <input
                 type="color"
+                value={toHexColor(navbarAccentColor, '#fbbf24')}
+                onChange={(e) => setNavbarAccentColor(e.target.value)}
+                className="w-9 h-9 rounded-lg cursor-pointer bg-transparent border-0 shrink-0"
+              />
+              <input
+                type="text"
                 value={navbarAccentColor}
                 onChange={(e) => setNavbarAccentColor(e.target.value)}
-                className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
+                placeholder="#fbbf24"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
               />
-              <span className="text-xs font-mono text-white">{navbarAccentColor}</span>
             </div>
           </div>
 
           <div>
             <label className="text-xs font-semibold text-slate-400 block mb-1.5">Storefront Primary Font Color</label>
-            <div className="flex items-center space-x-3 bg-slate-950 border border-slate-800 rounded-xl p-2">
+            <div className="flex items-center space-x-2 bg-slate-950 border border-slate-800 rounded-xl p-2">
               <input
                 type="color"
+                value={toHexColor(textColor, '#f8fafc')}
+                onChange={(e) => setTextColor(e.target.value)}
+                className="w-9 h-9 rounded-lg cursor-pointer bg-transparent border-0 shrink-0"
+              />
+              <input
+                type="text"
                 value={textColor}
                 onChange={(e) => setTextColor(e.target.value)}
-                className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
+                placeholder="#f8fafc"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
               />
-              <span className="text-xs font-mono text-white">{textColor}</span>
             </div>
           </div>
         </div>

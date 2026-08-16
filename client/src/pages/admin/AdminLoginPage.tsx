@@ -183,19 +183,7 @@ export const AdminLoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Bottom Toggle Link */}
-        <div className="text-center pt-2">
-          <button
-            type="button"
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setErrorMsg('');
-            }}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer transition-colors"
-          >
-            {isRegister ? 'Already have an account? Sign In' : 'Need an account? Register Now'}
-          </button>
-        </div>
+
       </div>
     </div>
   );

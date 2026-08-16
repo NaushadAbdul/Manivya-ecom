@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Zap, Flame, Award } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowRight, Sparkles, Flame, Award } from 'lucide-react';
 import { ProductGrid } from '../components/product/ProductGrid';
 import { apiService } from '../services/api';
 import { Product, Category } from '../types';
 import { CategoryIntroModal } from '../components/common/CategoryIntroModal';
 import { Category3DHero } from '../components/common/Category3DHero';
+import { ShopCatalogSection } from '../components/shop/ShopCatalogSection';
 
 const getCategoryGlowColor = (catNameOrSlug: string) => {
   const s = (catNameOrSlug || '').toLowerCase();
@@ -23,11 +24,15 @@ const getCategoryGlowColor = (catNameOrSlug: string) => {
 };
 
 export const HomePage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
   const [aiRecommendations, setAiRecommendations] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Selected Category for Embedded Catalog Section
+  const [selectedCatalogCategory, setSelectedCatalogCategory] = useState(searchParams.get('category') || '');
 
   // Universal Category Intro Video Overlay State
   const [categoryIntroOpen, setCategoryIntroOpen] = useState(false);
@@ -35,12 +40,16 @@ export const HomePage: React.FC = () => {
   const [selectedCatSlug, setSelectedCatSlug] = useState('');
   const [selectedCatVideo, setSelectedCatVideo] = useState('');
 
-  const handleCategoryClick = (e: React.MouseEvent, cat: Category) => {
+  const handleExploreCategory = (slug: string) => {
+    setSelectedCatalogCategory(slug);
+    setTimeout(() => {
+      document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  };
+
+  const handleCategoryCardClick = (e: React.MouseEvent, cat: Category) => {
     e.preventDefault();
-    setSelectedCatName(cat.name);
-    setSelectedCatSlug(cat.slug);
-    setSelectedCatVideo(cat.introVideo || '');
-    setCategoryIntroOpen(true);
+    handleExploreCategory(cat.slug);
   };
 
   useEffect(() => {
@@ -67,11 +76,31 @@ export const HomePage: React.FC = () => {
     fetchData();
   }, []);
 
+  // Listen for scroll to catalog event
+  useEffect(() => {
+    const handleScrollToCatalog = (e: any) => {
+      if (e.detail && e.detail.category) {
+        setSelectedCatalogCategory(e.detail.category);
+      }
+      setTimeout(() => {
+        document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    };
+
+    window.addEventListener('scrollToCatalog', handleScrollToCatalog);
+    return () => window.removeEventListener('scrollToCatalog', handleScrollToCatalog);
+  }, []);
+
+  const scrollToCatalog = (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="space-y-16 pb-16">
       {/* 3D Interactive Category Hero Section */}
       <section className="-mt-4">
-        <Category3DHero />
+        <Category3DHero onExploreCategory={handleExploreCategory} />
       </section>
 
       {/* Categories Auto-Slide Glassmorphism Marquee */}
@@ -97,9 +126,9 @@ export const HomePage: React.FC = () => {
             <h2 className="text-2xl font-bold text-white tracking-tight">Browse by Category</h2>
             <p className="text-xs text-slate-400 mt-1">Explore our wide selection of premium curated collections</p>
           </div>
-          <Link to="/shop" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          <button onClick={scrollToCatalog} className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer">
             View All <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          </button>
         </div>
 
         {/* Outer Glassmorphism Container with fade masks */}
@@ -128,11 +157,10 @@ export const HomePage: React.FC = () => {
               {categories.map((cat) => {
                 const glowColor = getCategoryGlowColor(cat.slug || cat.name);
                 return (
-                  <Link
+                  <button
                     key={cat._id}
-                    to={`/shop?category=${cat.slug}`}
-                    onClick={(e) => handleCategoryClick(e, cat)}
-                    className="group relative w-60 sm:w-72 h-44 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(99,102,241,0.25)] border border-white/10 hover:border-indigo-500/50"
+                    onClick={(e) => handleCategoryCardClick(e, cat)}
+                    className="group relative w-60 sm:w-72 h-44 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(99,102,241,0.25)] border border-white/10 hover:border-indigo-500/50 text-left cursor-pointer"
                     style={{
                       background: 'rgba(15, 12, 30, 0.65)',
                       backdropFilter: 'blur(20px)',
@@ -181,7 +209,7 @@ export const HomePage: React.FC = () => {
                         {cat.description || 'Explore curated collection'}
                       </p>
                     </div>
-                  </Link>
+                  </button>
                 );
               })}
             </div>
@@ -190,11 +218,10 @@ export const HomePage: React.FC = () => {
               {[...categories, ...categories].map((cat, idx) => {
                 const glowColor = getCategoryGlowColor(cat.slug || cat.name);
                 return (
-                  <Link
+                  <button
                     key={`${cat._id}-${idx}`}
-                    to={`/shop?category=${cat.slug}`}
-                    onClick={(e) => handleCategoryClick(e, cat)}
-                    className="group relative shrink-0 w-60 h-44 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(99,102,241,0.25)] mx-2 border border-white/10 hover:border-indigo-500/50"
+                    onClick={(e) => handleCategoryCardClick(e, cat)}
+                    className="group relative shrink-0 w-60 h-44 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(99,102,241,0.25)] mx-2 border border-white/10 hover:border-indigo-500/50 text-left cursor-pointer"
                     style={{
                       background: 'rgba(15, 12, 30, 0.65)',
                       backdropFilter: 'blur(20px)',
@@ -243,7 +270,7 @@ export const HomePage: React.FC = () => {
                         {cat.description || 'Explore curated collection'}
                       </p>
                     </div>
-                  </Link>
+                  </button>
                 );
               })}
             </div>
@@ -281,9 +308,9 @@ export const HomePage: React.FC = () => {
             </h2>
             <p className="text-xs text-slate-400 mt-1">Handpicked premium products with top rating performance</p>
           </div>
-          <Link to="/shop?featured=true" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300">
+          <button onClick={scrollToCatalog} className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 cursor-pointer">
             See More
-          </Link>
+          </button>
         </div>
 
         <ProductGrid products={featuredProducts} loading={loading} />
@@ -298,13 +325,19 @@ export const HomePage: React.FC = () => {
             </h2>
             <p className="text-xs text-slate-400 mt-1">Most ordered & searched items this week</p>
           </div>
-          <Link to="/shop?trending=true" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300">
+          <button onClick={scrollToCatalog} className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 cursor-pointer">
             View All
-          </Link>
+          </button>
         </div>
 
         <ProductGrid products={trendingProducts} loading={loading} />
       </section>
+
+      {/* Exact Catalog & Products Section Embedded Directly Below Trending Right Now */}
+      <ShopCatalogSection
+        initialCategory={selectedCatalogCategory}
+        onCategoryChange={(cat) => setSelectedCatalogCategory(cat)}
+      />
 
       {/* Category Fullscreen Intro Video Overlay */}
       <CategoryIntroModal

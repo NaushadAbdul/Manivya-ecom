@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, ShoppingBag, Heart, Sparkles } from 'lucide-react';
+import { Star, ShoppingBag, Sparkles } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 
@@ -9,8 +9,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart, toggleWishlist, isInWishlist } = useCart();
-  const inWishlist = isInWishlist(product._id);
+  const { addToCart } = useCart();
 
   const mainImage = product.images?.[0] || '';
 
@@ -29,22 +28,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </span>
         )}
       </div>
-
-      {/* Wishlist Button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          toggleWishlist(product);
-        }}
-        className={`absolute top-3 right-3 z-10 p-2 rounded-xl backdrop-blur-md transition-all ${
-          inWishlist
-            ? 'bg-rose-500 text-white'
-            : 'bg-slate-950/60 text-slate-300 hover:text-white hover:bg-slate-900'
-        }`}
-        title="Toggle Wishlist"
-      >
-        <Heart className={`w-4 h-4 ${inWishlist ? 'fill-white' : ''}`} />
-      </button>
 
       {/* Image Container */}
       <Link to={`/product/${product.slug || product._id}`} className="relative block h-36 sm:h-52 overflow-hidden bg-slate-950/50">

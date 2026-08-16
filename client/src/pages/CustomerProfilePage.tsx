@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { User, Package, MapPin, Heart, Bell, Settings, LogOut, ExternalLink, ShoppingBag, Trash2, AlertTriangle, X } from 'lucide-react';
+import { User, Package, MapPin, Bell, Settings, LogOut, ExternalLink, ShoppingBag, Trash2, AlertTriangle, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -10,7 +10,7 @@ import { Order, NotificationItem } from '../types';
 
 export const CustomerProfilePage: React.FC = () => {
   const { user, updateUserProfile, logout } = useAuth();
-  const { wishlist, addToCart, toggleWishlist } = useCart();
+  const { addToCart } = useCart();
   const { savedAddresses, deleteSavedAddress } = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -132,16 +132,6 @@ export const CustomerProfilePage: React.FC = () => {
         >
           <MapPin className="w-4 h-4" />
           <span>Addresses ({savedAddresses.length})</span>
-        </Link>
-
-        <Link
-          to="/profile?tab=wishlist"
-          className={`pb-3 border-b-2 flex items-center space-x-2 transition-all ${
-            activeTab === 'wishlist' ? 'border-indigo-500 text-indigo-400 font-bold' : 'border-transparent text-slate-400 hover:text-white'
-          }`}
-        >
-          <Heart className="w-4 h-4" />
-          <span>Wishlist ({wishlist.length})</span>
         </Link>
 
         <Link
@@ -324,94 +314,6 @@ export const CustomerProfilePage: React.FC = () => {
               <p className="text-[11px] text-slate-400">{addr.city}, {addr.state} - {addr.postalCode}</p>
             </div>
           ))}
-        </div>
-      )}
-
-      {activeTab === 'wishlist' && (
-        <div className="space-y-4">
-          {wishlist.length === 0 ? (
-            <div className="p-12 text-center bg-slate-900/40 rounded-3xl border border-slate-800 space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center mx-auto">
-                <Heart className="w-7 h-7" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold text-white">Your Wishlist is Empty</h3>
-                <p className="text-xs text-slate-400">Save your favorite luxury gadgets and items to view them here later.</p>
-              </div>
-              <Link
-                to="/shop"
-                className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
-              >
-                Explore Product Catalog
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {wishlist.map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-slate-900/60 border border-slate-800 hover:border-slate-700 rounded-3xl p-4 flex flex-col justify-between space-y-4 relative group transition-all"
-                >
-                  <div className="space-y-3">
-                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-950">
-                      <img
-                        src={(item.images && item.images[0]) || ''}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <button
-                        onClick={() => toggleWishlist(item)}
-                        title="Remove from Wishlist"
-                        className="absolute top-2.5 right-2.5 p-2 bg-slate-950/80 hover:bg-rose-600 text-pink-400 hover:text-white rounded-xl backdrop-blur-md border border-slate-800 transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                      {item.discount && item.discount > 0 ? (
-                        <span className="absolute top-2.5 left-2.5 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md">
-                          {item.discount}% OFF
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider block mb-0.5">
-                        {item.brand || 'MANIVYA Select'}
-                      </span>
-                      <Link
-                        to={`/product/${item.slug || item._id}`}
-                        className="text-xs font-bold text-white hover:text-indigo-400 line-clamp-1 transition-colors"
-                      >
-                        {item.name}
-                      </Link>
-                      <div className="flex items-center space-x-2 mt-1.5">
-                        <span className="text-sm font-extrabold text-white">₹{item.sellingPrice?.toLocaleString()}</span>
-                        {item.mrp && item.mrp > item.sellingPrice && (
-                          <span className="text-xs text-slate-500 line-through">₹{item.mrp?.toLocaleString()}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
-                    <button
-                      onClick={() => addToCart(item)}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-lg shadow-indigo-600/20"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>Add to Cart</span>
-                    </button>
-                    <Link
-                      to={`/product/${item.slug || item._id}`}
-                      className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
-                      title="View Details"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
