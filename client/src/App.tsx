@@ -10,6 +10,7 @@ import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { AIChatbot } from './components/common/AIChatbot';
 import { SplashScreen } from './components/common/SplashScreen';
+import { MouseEffects } from './components/common/MouseEffects';
 
 // Customer Storefront Pages
 import { HomePage } from './pages/HomePage';
@@ -96,6 +97,7 @@ export const App: React.FC = () => {
 
   return (
     <BrowserRouter>
+      <MouseEffects color="#818cf8" interactionMode="sniper" duration={0.35} strokeWidth={2.5} effectSize={90} />
       <AuthProvider>
         <LocationProvider>
           <CartProvider>
