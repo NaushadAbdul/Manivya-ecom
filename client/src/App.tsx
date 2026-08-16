@@ -11,6 +11,7 @@ import { Footer } from './components/common/Footer';
 import { AIChatbot } from './components/common/AIChatbot';
 import { SplashScreen } from './components/common/SplashScreen';
 import { MouseEffects } from './components/common/MouseEffects';
+import { ProximityHover } from './components/common/ProximityHover';
 
 // Customer Storefront Pages
 import { HomePage } from './pages/HomePage';
@@ -97,6 +98,8 @@ export const App: React.FC = () => {
 
   return (
     <BrowserRouter>
+      {/* Background Interactive Proximity Hover Particle Grid */}
+      <ProximityHover shape="rounded" particleColor="rgba(129, 140, 248, 0.14)" maxSize={18} minSize={3} gap={16} influence={240} />
       <MouseEffects color="#818cf8" interactionMode="sniper" duration={0.35} strokeWidth={2.5} effectSize={90} />
       <AuthProvider>
         <LocationProvider>
