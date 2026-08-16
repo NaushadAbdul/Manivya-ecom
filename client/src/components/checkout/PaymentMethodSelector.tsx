@@ -130,10 +130,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         </div>
       )}
 
-      <div className="flex items-center space-x-2 text-xs text-slate-400 bg-slate-900/40 p-3 rounded-xl border border-slate-800">
-        <AlertCircle className="w-4 h-4 text-indigo-400 shrink-0" />
-        <span>Razorpay payment gateway fully integrated with signature verification.</span>
-      </div>
+
     </div>
   );
 };
