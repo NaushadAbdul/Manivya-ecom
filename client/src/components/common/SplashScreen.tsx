@@ -239,6 +239,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         transform: isTransitioning ? 'scale(1.015)' : 'scale(1)',
         transition: 'opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
       }}
+      onClick={handleSkip}
     >
       {/* High-Contrast Canvas Frame Renderer with Hardware-Accelerated Sharpening Filter */}
       <canvas
@@ -249,52 +250,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           imageRendering: '-webkit-optimize-contrast',
         }}
       />
-
-      {/* Top Progress Beam Bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-black/40 z-30 overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-400 transition-all duration-75 ease-out shadow-[0_0_12px_#818cf8]"
-          style={{ width: `${progressPct}%` }}
-        />
-      </div>
-
-      {/* Ultra-Sharp High-End HUD / Brand Overlay */}
-      <div className="absolute bottom-8 left-6 sm:left-10 z-30 flex items-center space-x-4 pointer-events-none">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-600 to-amber-500 p-0.5 shadow-[0_0_25px_rgba(99,102,241,0.5)] flex items-center justify-center">
-          <div className="w-full h-full bg-slate-950/90 rounded-2xl flex items-center justify-center">
-            <span className="font-black text-amber-400 text-base tracking-tighter drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]">
-              M
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-0.5">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-white font-extrabold text-xs sm:text-sm tracking-[0.2em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-              MANIVYA ENTERPRISES
-            </h1>
-            <span className="bg-indigo-600/80 text-white font-mono text-[9px] font-bold px-2 py-0.5 rounded-full border border-indigo-400/40 shadow-sm">
-              {isMobile ? '9:16 MOBILE HD' : '16:9 DESKTOP HD'}
-            </span>
-          </div>
-          <p className="text-slate-300 text-[11px] font-medium tracking-wider drop-shadow flex items-center gap-2">
-            <span>Curated Luxury Storefront</span>
-            <span className="text-amber-400 font-mono font-bold">{progressPct}%</span>
-          </p>
-        </div>
-      </div>
-
-      {/* Skip Button with Glow Border */}
-      <button
-        onClick={handleSkip}
-        className="absolute top-6 right-6 z-30 flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 hover:bg-black/80 border border-purple-500/40 hover:border-purple-400 text-white text-xs font-bold tracking-widest backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all duration-300 hover:scale-105 active:scale-95 group cursor-pointer"
-        title="Press Space or Esc to skip"
-      >
-        <span>SKIP INTRO</span>
-        <svg className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 5l7 7-m0 0l-7 7m7-7H3" />
-        </svg>
-      </button>
 
       {/* Sharp Edge Vignette */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.7)]" />
