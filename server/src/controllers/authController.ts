@@ -1,41 +1,9 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
 import User from '../models/User';
-import LoginActivity from '../models/LoginActivity';
 import { sendSuccess, sendError } from '../utils/apiResponse';
 import { NotificationService } from '../services/notificationService';
 import { isDefinedAdminEmail } from '../utils/adminCheck';
-
-const parseUserAgent = (ua: string = '') => {
-  let browser = 'Chrome';
-  let device = 'Desktop';
-  let os = 'Windows';
-
-  if (/mobile|android|iphone|ipad/i.test(ua)) {
-    device = 'Mobile';
-  }
-
-  if (/macintosh|mac os x/i.test(ua)) os = 'macOS';
-  else if (/android/i.test(ua)) os = 'Android';
-  else if (/iphone|ipad/i.test(ua)) os = 'iOS';
-  else if (/linux/i.test(ua)) os = 'Linux';
-  else if (/windows/i.test(ua)) os = 'Windows';
-
-  if (/edg/i.test(ua)) browser = 'Edge';
-  else if (/chrome|crios/i.test(ua)) browser = 'Chrome';
-  else if (/firefox|fxios/i.test(ua)) browser = 'Firefox';
-  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari';
-
-  return { browser, device, os };
-};
-
-const getClientIp = (req: AuthRequest) => {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string') {
-    return forwarded.split(',')[0].trim();
-  }
-  return req.ip || req.socket.remoteAddress || '127.0.0.1';
-};
 
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   try {
@@ -75,10 +43,6 @@ export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
       return sendError(res, 'Provider UID is required for user synchronization', 400);
     }
 
-    const ipAddress = getClientIp(req);
-    const userAgentStr = (req.headers['user-agent'] as string) || '';
-    const { browser, device, os } = parseUserAgent(userAgentStr);
-
     // 1. Primary lookup by Provider UID (Source of Truth)
     let user = await User.findOne({ uid });
 
@@ -110,13 +74,7 @@ export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
         photo: photo || '',
         provider: provider || 'google',
         role: initialRole,
-        loginCount: 1,
         lastLogin: new Date(),
-        lastLoginIp: ipAddress,
-        lastLoginDevice: device,
-        lastLoginBrowser: browser,
-        lastLoginOs: os,
-        isOnline: true,
       });
 
       await NotificationService.sendNotification(
@@ -131,54 +89,12 @@ export const syncUserWithMongo = async (req: AuthRequest, res: Response) => {
         user.role = 'admin';
       }
       user.lastLogin = new Date();
-      user.loginCount = (user.loginCount || 0) + 1;
-      user.lastLoginIp = ipAddress;
-      user.lastLoginDevice = device;
-      user.lastLoginBrowser = browser;
-      user.lastLoginOs = os;
-      user.isOnline = true;
       if (name) user.name = name;
       if (photo) user.photo = photo;
       await user.save();
     }
 
-    // Mark previous active sessions as ended
-    await LoginActivity.updateMany(
-      { user: user._id, isCurrentSession: true },
-      { isCurrentSession: false, logoutTime: new Date() }
-    );
-
-    // Record audit entry in LoginActivity collection
-    await LoginActivity.create({
-      user: user._id,
-      uid: user.uid,
-      name: user.name,
-      email: user.email,
-      provider: user.provider || provider || 'google',
-      loginTime: new Date(),
-      ipAddress,
-      browser,
-      device,
-      os,
-      isCurrentSession: true,
-    });
-
     return sendSuccess(res, user, 'User synchronized successfully');
-  } catch (err) {
-    return sendError(res, (err as Error).message, 500);
-  }
-};
-
-export const logoutUser = async (req: AuthRequest, res: Response) => {
-  try {
-    if (req.user) {
-      await User.findByIdAndUpdate(req.user._id, { isOnline: false });
-      await LoginActivity.updateMany(
-        { user: req.user._id, isCurrentSession: true },
-        { isCurrentSession: false, logoutTime: new Date() }
-      );
-    }
-    return sendSuccess(res, null, 'User logged out successfully');
   } catch (err) {
     return sendError(res, (err as Error).message, 500);
   }

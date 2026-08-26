@@ -14,11 +14,6 @@ export interface IUser extends Document {
   totalSpent: number;
   createdAt: Date;
   lastLogin: Date;
-  lastLoginIp?: string;
-  lastLoginDevice?: string;
-  lastLoginBrowser?: string;
-  lastLoginOs?: string;
-  isOnline?: boolean;
 }
 
 const UserSchema: Schema = new Schema(
@@ -35,11 +30,6 @@ const UserSchema: Schema = new Schema(
     loginCount: { type: Number, default: 1 },
     totalSpent: { type: Number, default: 0 },
     lastLogin: { type: Date, default: Date.now },
-    lastLoginIp: { type: String, default: '' },
-    lastLoginDevice: { type: String, default: 'Desktop' },
-    lastLoginBrowser: { type: String, default: 'Chrome' },
-    lastLoginOs: { type: String, default: 'Windows' },
-    isOnline: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
