@@ -16,7 +16,7 @@ router.get('/', getProducts);
 router.get('/:identifier', getProductBySlugOrId);
 
 // Admin Routes
-router.post('/', authenticate, requireAdmin, upload.array('images', 5), createProduct);
+router.post('/', authenticate, requireAdmin, upload.array('images', 5) as any, createProduct);
 router.put('/:id', authenticate, requireAdmin, updateProduct);
 router.delete('/:id', authenticate, requireAdmin, deleteProduct);
 router.patch('/:id/restore', authenticate, requireAdmin, restoreProduct);

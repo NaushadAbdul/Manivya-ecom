@@ -11,7 +11,7 @@ import { upload } from '../middleware/uploadMiddleware';
 
 const router = Router();
 
-router.post('/upload-proof', authenticate, upload.single('proof'), uploadPaymentProof);
+router.post('/upload-proof', authenticate, upload.single('proof') as any, uploadPaymentProof);
 router.post('/razorpay/create-order', authenticate, createRazorpayOrder);
 router.post('/razorpay/verify', authenticate, verifyRazorpayPayment);
 
