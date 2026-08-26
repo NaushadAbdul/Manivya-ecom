@@ -78,6 +78,7 @@ export const apiService = {
   getOrderById: (id: string) => api.get(`/orders/${id}`),
   getAllOrdersAdmin: (params?: any) => api.get('/orders/admin/all', { params }),
   updateOrderStatusAdmin: (id: string, status: string, note?: string) => api.patch(`/orders/admin/${id}/status`, { status, note }),
+  deleteOrderAdmin: (id: string) => api.delete(`/orders/admin/${id}`),
 
   // Payments & Proof Verification
   uploadPaymentProof: (formData: FormData) => api.post('/payments/upload-proof', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),

@@ -352,3 +352,14 @@ export const cancelOrder = async (req: AuthRequest, res: Response) => {
     return sendError(res, (err as Error).message, 500);
   }
 };
+
+export const deleteOrderAdmin = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findByIdAndDelete(id);
+    if (!order) return sendError(res, 'Order not found', 404);
+    return sendSuccess(res, null, 'Order deleted successfully from database');
+  } catch (err) {
+    return sendError(res, (err as Error).message, 500);
+  }
+};
