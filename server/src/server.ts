@@ -79,6 +79,15 @@ app.use('/api/showcase', showcaseRoutes);
 app.use('/api/hero-3d', hero3dRoutes);
 app.use('/api/theme', themeRoutes);
 
+// Root Route
+app.get('/', (_req, res) => {
+  res.json({
+    message: '🚀 MANIVYA Enterprises REST API Server is Live & Running!',
+    health: '/api/health',
+    timestamp: new Date(),
+  });
+});
+
 // Healthcheck Route
 app.get('/api/health', (_req, res) => {
   res.json({
