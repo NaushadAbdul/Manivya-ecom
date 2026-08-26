@@ -3,6 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+
+dotenv.config();
+
 import { connectDB, getDbStatus } from './config/db';
 import { initFirebaseAdmin } from './config/firebase';
 import { errorHandler } from './middleware/errorHandler';
@@ -24,8 +27,6 @@ import activityRoutes from './routes/activityRoutes';
 import showcaseRoutes from './routes/showcaseRoutes';
 import hero3dRoutes from './routes/hero3dRoutes';
 import themeRoutes from './routes/themeRoutes';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

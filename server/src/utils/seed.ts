@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import dns from 'dns';
+import { connectDB } from '../config/db';
 import Category from '../models/Category';
 import Product from '../models/Product';
 import User from '../models/User';
@@ -12,13 +12,8 @@ dotenv.config();
 
 const seedData = async () => {
   try {
-    try {
-      dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
-    } catch (e) {}
-
-    const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/manivya';
-    await mongoose.connect(connStr);
-    console.log('[Seed] Connected to MongoDB Atlas...');
+    await connectDB();
+    console.log('[Seed] Connected to MongoDB Atlas via central DB config...');
 
     // Clear existing system records (Preserve admin products & categories)
     await User.deleteMany({});
