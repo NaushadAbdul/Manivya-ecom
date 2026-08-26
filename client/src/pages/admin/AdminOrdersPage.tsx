@@ -131,31 +131,23 @@ export const AdminOrdersPage: React.FC = () => {
           </div>
         ) : (
           orders.map((o) => {
-            const userObj = typeof o.user === 'object' ? o.user : null;
-            const rawName = o.shippingAddress?.name;
-            const userName = userObj?.name;
-            const customerName =
-              rawName && rawName !== 'Detected Location'
-                ? rawName
-                : userName && userName !== 'Detected Location'
-                ? userName
-                : 'Valued Customer';
-            const customerEmail = userObj?.email || '';
-            const customerPhone = o.shippingAddress?.phone || userObj?.phone || '';
+            const customerName = o.shippingAddress?.name || (typeof o.user === 'object' ? o.user?.name : '') || 'Valued Customer';
+            const customerEmail = typeof o.user === 'object' ? o.user?.email : '';
+            const customerPhone = o.shippingAddress?.phone || (typeof o.user === 'object' ? o.user?.phone : '') || '';
             const payStatus = o.paymentInfo?.status || 'Pending';
 
             return (
-              <div key={o._id} className="bg-slate-900/60 border border-slate-800 p-5 rounded-3xl space-y-4 hover:border-slate-700/80 transition-all relative">
-                {/* Header Row: Order #, Tracking, Status Dropdown & Delete Button */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div key={o._id} className="bg-slate-900/60 border border-slate-800 p-5 rounded-3xl space-y-4 hover:border-slate-700/80 transition-all">
+                {/* Header Row: Order #, Tracking, Status Dropdown & Delete Icon */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
+                  <div className="flex items-center space-x-3">
                     <span className="font-extrabold text-white text-base">Order #{o.orderNumber}</span>
-                    <span className="text-xs text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg">
+                    <span className="text-xs text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-lg">
                       {o.trackingNumber || 'Pending TRK'}
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs text-slate-400">Status:</span>
                       <select
@@ -169,14 +161,13 @@ export const AdminOrdersPage: React.FC = () => {
                       </select>
                     </div>
 
-                    {/* Red Delete Trash Icon Button */}
+                    {/* Red Delete Trash Icon */}
                     <button
                       onClick={() => handleDeleteOrder(o._id, o.orderNumber)}
                       title="Delete Order Permanently"
-                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl border border-rose-500/30 text-xs font-bold transition-all shrink-0 active:scale-95"
+                      className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl border border-rose-500/30 transition-all"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Delete</span>
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -189,12 +180,16 @@ export const AdminOrdersPage: React.FC = () => {
                       <User className="w-3.5 h-3.5 text-indigo-400" /> Customer Personal Details
                     </p>
                     <p className="text-white font-bold text-sm">{customerName}</p>
-                    <p className="text-slate-300 flex items-center gap-1 text-[11px]">
-                      <Mail className="w-3 h-3 text-slate-400" /> {customerEmail || 'No registered email'}
-                    </p>
-                    <p className="text-slate-300 flex items-center gap-1 text-[11px]">
-                      <Phone className="w-3 h-3 text-slate-400" /> {customerPhone || 'No phone number'}
-                    </p>
+                    {customerEmail && (
+                      <p className="text-slate-300 flex items-center gap-1 text-[11px]">
+                        <Mail className="w-3 h-3 text-slate-400" /> {customerEmail}
+                      </p>
+                    )}
+                    {customerPhone && (
+                      <p className="text-slate-300 flex items-center gap-1 text-[11px]">
+                        <Phone className="w-3 h-3 text-slate-400" /> {customerPhone}
+                      </p>
+                    )}
                   </div>
 
                   {/* Delivery Address */}
