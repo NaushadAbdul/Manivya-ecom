@@ -240,8 +240,7 @@ export const getAllOrdersAdmin = async (req: AuthRequest, res: Response) => {
     if (search) query.orderNumber = { $regex: search as string, $options: 'i' };
 
     const orders = await Order.find(query)
-      .populate('user', 'name email phone photo')
-      .populate('items.product', 'name images image price sellingPrice')
+      .populate('user', 'name email phone')
       .sort({ createdAt: -1 });
 
     return sendSuccess(res, orders, 'All orders fetched for admin');
