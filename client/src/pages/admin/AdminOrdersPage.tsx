@@ -242,22 +242,31 @@ export const AdminOrdersPage: React.FC = () => {
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    {o.items?.map((item, idx) => (
-                      <div key={idx} className="flex items-center space-x-3 bg-slate-900 border border-slate-800 p-2.5 rounded-xl">
-                        <img
-                          src={item.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150'}
-                          alt={item.name}
-                          className="w-12 h-12 object-cover rounded-lg bg-slate-950 shrink-0 border border-slate-800"
-                        />
-                        <div className="flex-1 min-w-0 text-xs">
-                          <p className="font-bold text-white truncate">{item.name}</p>
-                          <div className="flex justify-between items-center text-slate-400 mt-0.5 text-[11px]">
-                            <span>Qty: <strong className="text-indigo-400">{item.quantity}</strong></span>
-                            <span className="font-semibold text-emerald-400">₹{(item.price * item.quantity).toLocaleString()}</span>
+                    {o.items?.map((item, idx) => {
+                      const prodObj = typeof item.product === 'object' ? (item.product as any) : null;
+                      const pImg =
+                        item.image ||
+                        prodObj?.images?.[0] ||
+                        prodObj?.image ||
+                        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300';
+
+                      return (
+                        <div key={idx} className="flex items-center space-x-3 bg-slate-900 border border-slate-800 p-3 rounded-2xl hover:border-slate-700 transition-all">
+                          <img
+                            src={pImg}
+                            alt={item.name}
+                            className="w-14 h-14 object-cover rounded-xl bg-slate-950 shrink-0 border border-slate-700 shadow-md"
+                          />
+                          <div className="flex-1 min-w-0 text-xs">
+                            <p className="font-bold text-white truncate text-xs">{item.name}</p>
+                            <div className="flex justify-between items-center text-slate-400 mt-1 text-[11px]">
+                              <span>Qty: <strong className="text-indigo-400 font-extrabold">{item.quantity}</strong></span>
+                              <span className="font-bold text-emerald-400">₹{(item.price * item.quantity).toLocaleString()}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
