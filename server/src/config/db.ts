@@ -58,12 +58,24 @@ export const getDbStatus = () => ({
   hasUri: !!process.env.MONGODB_URI,
 });
 
+const cleanUri = (uri: string) => {
+  let str = uri.trim();
+  str = str.replace(/^["'\\s]+|["'\\s]+$/g, '').trim();
+  if (str.startsWith('\"') || str.startsWith('\'')) {
+    str = str.substring(1);
+  }
+  if (str.endsWith('\"') || str.endsWith('\'')) {
+    str = str.slice(0, -1);
+  }
+  return str.trim();
+};
+
 export const connectDB = async () => {
   try {
     applyDnsFix();
 
     const rawUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/manivya';
-    const connStr = rawUri.replace(/^["']|["']$/g, '').trim();
+    const connStr = cleanUri(rawUri);
     const maskedUri = connStr.replace(/:([^@]+)@/, ':****@');
     console.log(`[MongoDB Atlas] Attempting connection with URI: ${maskedUri}`);
 
@@ -84,7 +96,7 @@ export const connectDB = async () => {
       applyDnsFix();
       try {
         const rawUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/manivya';
-        const connStr = rawUri.replace(/^["']|["']$/g, '').trim();
+        const connStr = cleanUri(rawUri);
         const conn = await mongoose.connect(connStr, {
           serverSelectionTimeoutMS: 20000,
           connectTimeoutMS: 30000,
