@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_cB2k9AD7y7gnG0s28OO2I8R9juNS",
+  "orgId": "team_WbSkCmeUkmyHBzxtLywDupZc",
+  "projectName": "client",
+  "settings": {
+    "createdAt": 1787739616980,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

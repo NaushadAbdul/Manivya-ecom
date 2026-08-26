@@ -141,8 +141,20 @@ export const AdminOrdersPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 <div>
                   <p className="text-slate-500 font-semibold uppercase">Customer Info</p>
-                  <p className="text-white font-bold mt-0.5">{typeof o.user === 'object' ? (o.user?.name || 'Valued Customer') : 'Customer'}</p>
+                  <p className="text-white font-bold mt-0.5">
+                    {o.shippingAddress?.name && o.shippingAddress.name !== 'Detected Location'
+                      ? o.shippingAddress.name
+                      : typeof o.user === 'object' && o.user?.name && o.user.name !== 'Detected Location'
+                      ? o.user.name
+                      : 'Valued Customer'}
+                  </p>
                   <p className="text-slate-400">{typeof o.user === 'object' ? (o.user?.email || '') : ''}</p>
+                  {(o.shippingAddress?.phone || (typeof o.user === 'object' ? o.user?.phone : '')) && (
+                    <p className="text-indigo-400 font-bold mt-1 flex items-center gap-1.5 text-xs">
+                      <Phone className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>{o.shippingAddress?.phone || (typeof o.user === 'object' ? o.user?.phone : '')}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div>
