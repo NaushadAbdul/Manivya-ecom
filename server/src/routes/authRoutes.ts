@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import { getCurrentUser, updateProfile, syncUserWithMongo, getAllUsers, updateUserRole, blockUnblockUser } from '../controllers/authController';
+import { getCurrentUser, updateProfile, deleteAccount, syncUserWithMongo, getAllUsers, updateUserRole, blockUnblockUser } from '../controllers/authController';
 import { authenticate, requireAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
 
 router.get('/me', authenticate, getCurrentUser);
 router.put('/profile', authenticate, updateProfile);
+router.delete('/delete-account', authenticate, deleteAccount);
 router.post('/sync', syncUserWithMongo);
 
 // Admin Only Routes

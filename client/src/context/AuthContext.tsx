@@ -6,6 +6,7 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
   signOut,
+  deleteUser,
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
@@ -30,6 +31,7 @@ interface AuthContextType {
   logout: () => void;
   logoutAdmin: () => void;
   updateUserProfile: (data: { name?: string; phone?: string; photo?: string }) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -460,6 +462,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      setLoading(true);
+      await apiService.deleteAccount();
+      if (auth.currentUser) {
+        await deleteUser(auth.currentUser).catch(() => {});
+      }
+      await signOut(auth).catch(() => {});
+      localStorage.removeItem('manivya_customer_token');
+      localStorage.removeItem('manivya_customer_user');
+      localStorage.removeItem('manivya_token');
+      setToken(null);
+      setUser(null);
+      toast.success('Your account has been permanently deleted');
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || 'Failed to delete account';
+      toast.error(msg);
+      throw new Error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -478,6 +503,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         logoutAdmin,
         updateUserProfile,
+        deleteAccount,
       }}
     >
       {children}

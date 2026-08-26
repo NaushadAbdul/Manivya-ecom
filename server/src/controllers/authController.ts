@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
 import User from '../models/User';
@@ -29,6 +30,33 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
 
     await user.save();
     return sendSuccess(res, user, 'Profile updated successfully');
+  } catch (err) {
+    return sendError(res, (err as Error).message, 500);
+  }
+};
+
+export const deleteAccount = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return sendError(res, 'Unauthorized', 401);
+    }
+
+    const userId = req.user._id;
+
+    // Delete user from User collection
+    await User.findByIdAndDelete(userId);
+
+    // Clean up related customer records
+    try {
+      await mongoose.model('Cart').deleteMany({ user: userId });
+      await mongoose.model('Wishlist').deleteMany({ user: userId });
+      await mongoose.model('Address').deleteMany({ user: userId });
+      await mongoose.model('Notification').deleteMany({ user: userId });
+    } catch (e) {
+      // Ignore cleanup errors if model not registered
+    }
+
+    return sendSuccess(res, null, 'User account deleted successfully');
   } catch (err) {
     return sendError(res, (err as Error).message, 500);
   }

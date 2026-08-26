@@ -43,6 +43,7 @@ export const apiService = {
   // Auth & Profile
   getCurrentUser: () => api.get('/auth/me'),
   updateProfile: (data: { name?: string; phone?: string; photo?: string }) => api.put('/auth/profile', data),
+  deleteAccount: () => api.delete('/auth/delete-account'),
   syncUser: (userData: any) => api.post('/auth/sync', userData),
   getAllUsers: () => api.get('/auth/users'),
   createNewAdminUser: (data: { name: string; email: string; phone?: string; password?: string }) =>

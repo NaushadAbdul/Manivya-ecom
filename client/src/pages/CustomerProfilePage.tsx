@@ -9,7 +9,7 @@ import { apiService } from '../services/api';
 import { Order, NotificationItem } from '../types';
 
 export const CustomerProfilePage: React.FC = () => {
-  const { user, updateUserProfile, logout } = useAuth();
+  const { user, updateUserProfile, deleteAccount, logout } = useAuth();
   const { addToCart } = useCart();
   const { savedAddresses, deleteSavedAddress } = useLocation();
   const [searchParams] = useSearchParams();
@@ -26,6 +26,10 @@ export const CustomerProfilePage: React.FC = () => {
   const [cancellingOrder, setCancellingOrder] = useState<Order | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
+
+  // Delete Account Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -45,6 +49,19 @@ export const CustomerProfilePage: React.FC = () => {
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateUserProfile({ name: nameInput, phone: phoneInput });
+  };
+
+  const handleDeleteAccountConfirm = async () => {
+    try {
+      setIsDeletingAccount(true);
+      await deleteAccount();
+      setShowDeleteModal(false);
+      navigate('/');
+    } catch (err) {
+      // Toast handles error display
+    } finally {
+      setIsDeletingAccount(false);
+    }
   };
 
   const handleCancelOrder = async () => {
@@ -349,36 +366,108 @@ export const CustomerProfilePage: React.FC = () => {
       )}
 
       {activeTab === 'settings' && (
-        <form onSubmit={handleProfileSave} className="max-w-md bg-slate-900/60 border border-slate-800 p-6 rounded-3xl space-y-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Account Information</h3>
+        <div className="max-w-md space-y-6">
+          <form onSubmit={handleProfileSave} className="bg-slate-900/60 border border-slate-800 p-6 rounded-3xl space-y-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Account Information</h3>
 
-          <div>
-            <label className="text-xs font-semibold text-slate-400 block mb-1">Full Name</label>
-            <input
-              type="text"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white"
-            />
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Full Name</label>
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Phone Number</label>
+              <input
+                type="text"
+                value={phoneInput}
+                onChange={(e) => setPhoneInput(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition-all"
+            >
+              Save Profile Updates
+            </button>
+          </form>
+
+          {/* Danger Zone */}
+          <div className="bg-rose-950/20 border border-rose-900/40 p-6 rounded-3xl space-y-3">
+            <h3 className="text-sm font-extrabold text-rose-400 uppercase tracking-wider flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" /> Danger Zone
+            </h3>
+            <p className="text-xs text-slate-400">
+              Deleting your account will permanently erase your profile, saved addresses, cart items, and stored credentials.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              className="w-full bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 font-bold text-xs py-2.5 rounded-xl transition-all flex items-center justify-center space-x-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete My Account</span>
+            </button>
           </div>
+        </div>
+      )}
 
-          <div>
-            <label className="text-xs font-semibold text-slate-400 block mb-1">Phone Number</label>
-            <input
-              type="text"
-              value={phoneInput}
-              onChange={(e) => setPhoneInput(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white"
-            />
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3 text-rose-400">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-rose-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Permanently Delete Account?</h3>
+                <p className="text-xs text-slate-400">This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <div className="bg-rose-950/30 border border-rose-900/50 p-3.5 rounded-2xl text-xs text-slate-300 space-y-1.5">
+              <p className="font-semibold text-rose-300">What happens when you delete your account:</p>
+              <ul className="list-disc pl-4 space-y-1 text-slate-400 text-[11px]">
+                <li>Your profile and login access will be permanently destroyed.</li>
+                <li>Saved delivery addresses and active shopping cart will be wiped.</li>
+                <li>You will be automatically logged out across all devices.</li>
+              </ul>
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-all"
+              >
+                Keep My Account
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccountConfirm}
+                disabled={isDeletingAccount}
+                className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 shadow-lg shadow-rose-600/30"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{isDeletingAccount ? 'Deleting...' : 'Yes, Delete Account'}</span>
+              </button>
+            </div>
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition-all"
-          >
-            Save Profile Updates
-          </button>
-        </form>
+        </div>
       )}
     </div>
   );
