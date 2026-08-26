@@ -12,8 +12,11 @@ export const AdminCategoriesPage: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
+  const [introVideo, setIntroVideo] = useState('');
 
   const [imageInputMode, setImageInputMode] = useState<'url' | 'file'>('url');
+  const [videoInputMode, setVideoInputMode] = useState<'url' | 'file'>('url');
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const loadCategories = async () => {
     try {
@@ -44,7 +47,9 @@ export const AdminCategoriesPage: React.FC = () => {
     setName('');
     setDescription('');
     setImage('');
+    setIntroVideo('');
     setImageInputMode('url');
+    setVideoInputMode('url');
     setModalOpen(true);
   };
 
@@ -53,7 +58,9 @@ export const AdminCategoriesPage: React.FC = () => {
     setName(c.name || '');
     setDescription(c.description || '');
     setImage(c.image || '');
+    setIntroVideo(c.introVideo || '');
     setImageInputMode('url');
+    setVideoInputMode('url');
     setModalOpen(true);
   };
 
@@ -72,6 +79,23 @@ export const AdminCategoriesPage: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingVideo(true);
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setIntroVideo(event.target.result as string);
+        toast.success('Category intro video attached!');
+      }
+      setUploadingVideo(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -80,6 +104,7 @@ export const AdminCategoriesPage: React.FC = () => {
           name,
           description,
           image,
+          introVideo,
         });
         if (res.data.success) {
           toast.success(`Category "${name}" updated successfully!`);
@@ -89,6 +114,7 @@ export const AdminCategoriesPage: React.FC = () => {
           name,
           description,
           image,
+          introVideo,
         });
         if (res.data.success) {
           toast.success(`New category "${name}" created!`);
@@ -100,6 +126,7 @@ export const AdminCategoriesPage: React.FC = () => {
       setName('');
       setDescription('');
       setImage('');
+      setIntroVideo('');
       loadCategories();
     } catch (err: any) {
       const errMsg = err.response?.data?.message || err.message || 'Operation failed';
@@ -282,6 +309,98 @@ export const AdminCategoriesPage: React.FC = () => {
                       <span className="text-xs text-slate-200 font-bold block">Select banner image file</span>
                     </label>
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Category Intro Video Asset */}
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl space-y-3">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Video className="w-4 h-4 text-purple-400" />
+                  <span>Category Intro Video Asset</span>
+                </label>
+
+                <div className="flex bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-[10px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setVideoInputMode('url')}
+                    className={`px-2.5 py-1 rounded-md transition-all ${
+                      videoInputMode === 'url' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    URL / Path
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVideoInputMode('file')}
+                    className={`px-2.5 py-1 rounded-md transition-all ${
+                      videoInputMode === 'file' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Upload File
+                  </button>
+                </div>
+              </div>
+
+              {videoInputMode === 'url' ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. /videos/category-intro.mp4 or https://..."
+                    value={introVideo.startsWith('data:') ? '' : introVideo}
+                    onChange={(e) => setIntroVideo(e.target.value)}
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-purple-500 outline-none"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="border-2 border-dashed border-slate-800 hover:border-purple-500/80 rounded-xl p-3 text-center cursor-pointer transition-all bg-slate-900/60">
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg,video/*"
+                      onChange={handleVideoFileUpload}
+                      className="hidden"
+                      id="cat-video-upload"
+                    />
+                    <label htmlFor="cat-video-upload" className="cursor-pointer space-y-1 block">
+                      <Upload className="w-5 h-5 text-purple-400 mx-auto" />
+                      <span className="text-xs text-slate-200 font-bold block">
+                        {uploadingVideo ? 'Processing video file...' : 'Select category intro video file'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {introVideo && (
+                <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center space-x-3">
+                  <div className="w-16 h-12 bg-black rounded-lg border border-slate-700 overflow-hidden shrink-0 flex items-center justify-center relative">
+                    <video
+                      src={introVideo}
+                      className="w-full h-full object-cover"
+                      muted
+                      autoPlay
+                      loop
+                      playsInline
+                      preload="auto"
+                    />
+                  </div>
+                  <div className="flex-1 text-[11px] overflow-hidden">
+                    <span className="font-bold text-emerald-400 block">Intro Video Attached</span>
+                    <span className="text-slate-400 font-mono truncate block text-[10px]">
+                      {introVideo.startsWith('data:')
+                        ? 'Uploaded Video File (Embedded Base64 Media)'
+                        : introVideo}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIntroVideo('')}
+                    className="text-xs text-rose-400 hover:text-rose-300 font-bold px-2 py-1 bg-rose-500/10 rounded-lg shrink-0"
+                  >
+                    Remove
+                  </button>
                 </div>
               )}
             </div>

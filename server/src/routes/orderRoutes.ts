@@ -5,7 +5,6 @@ import {
   getOrderById,
   getAllOrdersAdmin,
   updateOrderStatusAdmin,
-  deleteOrderAdmin,
   cancelOrder,
 } from '../controllers/orderController';
 import { authenticate, requireAdmin } from '../middleware/authMiddleware';
@@ -20,6 +19,5 @@ router.post('/:id/cancel', authenticate, cancelOrder);
 // Admin Routes
 router.get('/admin/all', authenticate, requireAdmin, getAllOrdersAdmin);
 router.patch('/admin/:id/status', authenticate, requireAdmin, updateOrderStatusAdmin);
-router.delete('/admin/:id', authenticate, requireAdmin, deleteOrderAdmin);
 
 export default router;
