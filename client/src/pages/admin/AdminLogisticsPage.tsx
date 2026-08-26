@@ -228,20 +228,28 @@ export const AdminLogisticsPage: React.FC = () => {
       {activeTab === 'shipments' && (
         <div className="space-y-4">
           {orders.map((o) => {
-            const customerName = o.shippingAddress?.name || (typeof o.user === 'object' ? o.user?.name : '') || 'Valued Customer';
-            const customerPhone = o.shippingAddress?.phone || (typeof o.user === 'object' ? o.user?.phone : '') || '';
+            const userObj = typeof o.user === 'object' ? o.user : null;
+            const rawName = o.shippingAddress?.name;
+            const userName = userObj?.name;
+            const customerName =
+              rawName && rawName !== 'Detected Location'
+                ? rawName
+                : userName && userName !== 'Detected Location'
+                ? userName
+                : 'Valued Customer';
+            const customerPhone = o.shippingAddress?.phone || userObj?.phone || '';
 
             return (
               <div key={o._id} className="p-5 bg-slate-900/60 border border-slate-800 rounded-3xl space-y-4 hover:border-slate-700/80 transition-all">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
-                  <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <span className="font-extrabold text-white text-base">Order #{o.orderNumber}</span>
-                    <span className="text-xs text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-lg">
+                    <span className="text-xs text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg">
                       {o.trackingNumber}
                     </span>
                   </div>
 
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs text-slate-400">Workflow Step:</span>
                       <select
@@ -255,13 +263,14 @@ export const AdminLogisticsPage: React.FC = () => {
                       </select>
                     </div>
 
-                    {/* Red Delete Trash Icon */}
+                    {/* Red Delete Trash Icon Button */}
                     <button
                       onClick={() => handleDeleteOrder(o._id, o.orderNumber)}
                       title="Delete Order Permanently"
-                      className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl border border-rose-500/30 transition-all"
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl border border-rose-500/30 text-xs font-bold transition-all shrink-0 active:scale-95"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
                     </button>
                   </div>
                 </div>
