@@ -169,6 +169,44 @@ export const AdminOrdersPage: React.FC = () => {
                   <p className="text-slate-400 uppercase font-mono">{o.paymentMethod || 'COD'} ({o.paymentInfo?.status || 'Pending'})</p>
                 </div>
               </div>
+
+              {/* Products Ordered List with Images */}
+              {o.items && o.items.length > 0 && (
+                <div className="pt-3 border-t border-slate-800/80 space-y-2">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                    <Package className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Products Ordered ({o.items.length})</span>
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                    {o.items.map((item, idx) => {
+                      const prodObj = typeof item.product === 'object' ? (item.product as any) : null;
+                      const pImg =
+                        item.image ||
+                        prodObj?.images?.[0] ||
+                        prodObj?.image ||
+                        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150';
+
+                      return (
+                        <div key={idx} className="flex items-center space-x-2.5 bg-slate-950/60 border border-slate-800/90 p-2 rounded-xl">
+                          <img
+                            src={pImg}
+                            alt={item.name}
+                            className="w-10 h-10 object-cover rounded-lg bg-slate-900 shrink-0 border border-slate-800"
+                          />
+                          <div className="flex-1 min-w-0 text-xs">
+                            <p className="font-semibold text-white truncate text-[11px]">{item.name}</p>
+                            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-0.5">
+                              <span>Qty: <strong className="text-indigo-400">{item.quantity}</strong></span>
+                              <span className="font-bold text-emerald-400">₹{(item.price * item.quantity).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           ))
         )}
