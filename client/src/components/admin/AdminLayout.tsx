@@ -27,8 +27,8 @@ export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Active Admin Resolution: strictly check dedicated adminUser session
-  const activeAdmin = adminUser;
+  // Active Admin Resolution: check dedicated adminUser or admin role
+  const activeAdmin = adminUser || (user?.role === 'admin' ? user : null);
 
   if (loading) {
     return (
@@ -55,6 +55,7 @@ export const AdminLayout: React.FC = () => {
     { label: 'Analytics Deep Dive', path: '/manivya-admin/analytics', icon: LineChart },
     { label: 'Navbar & Page Theme', path: '/manivya-admin/theme', icon: Palette },
     { label: '3D Hero Categories', path: '/manivya-admin/hero-3d', icon: Sparkles },
+    { label: 'Showcase Banners', path: '/manivya-admin/showcase', icon: Sparkles },
     { label: 'Products Catalog', path: '/manivya-admin/products', icon: Package },
     { label: 'Logistics & Fleet', path: '/manivya-admin/logistics', icon: Truck },
     { label: 'Orders & Status', path: '/manivya-admin/orders', icon: ShoppingBag },

@@ -177,13 +177,23 @@ export const AdminLoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs py-3 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all cursor-pointer"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs py-3 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50"
           >
-            {isRegister ? 'Create Admin Account' : 'Sign In'}
+            {loading ? 'Authenticating...' : (isRegister ? 'Create Admin Account' : 'Sign In as Admin')}
           </button>
         </form>
 
-
+        {/* Quick Admin Demo Fill & Auto-Login Option */}
+        <div className="pt-2 border-t border-slate-800 space-y-3">
+          <button
+            type="button"
+            onClick={fillQuickAdmin}
+            className="w-full bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-500/30 hover:border-indigo-400 text-indigo-300 text-xs py-2.5 px-4 rounded-2xl font-semibold transition-all flex items-center justify-center space-x-2"
+          >
+            <ShieldCheck className="w-4 h-4 text-indigo-400" />
+            <span>Fill Admin Credentials (admin@manivya.com)</span>
+          </button>
+        </div>
       </div>
     </div>
   );

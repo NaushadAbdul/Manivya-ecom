@@ -126,10 +126,12 @@ export const App: React.FC = () => {
                 <Route path="users" element={<AdminCustomersPage />} />
                 <Route path="analytics" element={<AdminAnalyticsPage />} />
                 <Route path="hero-3d" element={<AdminHero3DPage />} />
+                <Route path="showcase" element={<AdminShowcasePage />} />
                 <Route path="theme" element={<AdminThemePage />} />
               </Route>
 
-              {/* Legacy /admin redirect guard */}
+              {/* Legacy /admin redirect guards */}
+              <Route path="/admin" element={<Navigate to="/manivya-admin/login" replace />} />
               <Route path="/admin/*" element={<Navigate to="/manivya-admin/login" replace />} />
 
               {/* Storefront Customer Layout with Splash */}

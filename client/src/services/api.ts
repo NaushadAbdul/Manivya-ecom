@@ -15,8 +15,12 @@ api.interceptors.request.use((config) => {
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
   const reqUrl = config.url || '';
 
+  const adminToken = localStorage.getItem('manivya_admin_token');
+  const customerToken = localStorage.getItem('manivya_customer_token') || localStorage.getItem('manivya_token');
+
   const isAdminEndpoint =
     currentPath.startsWith('/manivya-admin') ||
+    currentPath.startsWith('/admin') ||
     reqUrl.includes('/admin') ||
     reqUrl.includes('/payments/pending') ||
     reqUrl.includes('/payments/verify') ||
@@ -25,12 +29,15 @@ api.interceptors.request.use((config) => {
     reqUrl.includes('/analytics/') ||
     reqUrl.includes('/logistics/warehouses') ||
     reqUrl.includes('/logistics/partners') ||
-    (reqUrl.includes('/hero-3d') && config.method !== 'get');
-
-  const adminToken = localStorage.getItem('manivya_admin_token');
-  const customerToken = localStorage.getItem('manivya_customer_token') || localStorage.getItem('manivya_token');
+    (reqUrl.includes('/hero-3d') && config.method !== 'get') ||
+    (reqUrl.includes('/showcase') && config.method !== 'get') ||
+    (reqUrl.includes('/theme') && config.method !== 'get') ||
+    (reqUrl.includes('/products') && config.method !== 'get') ||
+    (reqUrl.includes('/categories') && config.method !== 'get');
 
   if (isAdminEndpoint && adminToken) {
+    config.headers.Authorization = `Bearer ${adminToken}`;
+  } else if (adminToken && !customerToken) {
     config.headers.Authorization = `Bearer ${adminToken}`;
   } else if (customerToken) {
     config.headers.Authorization = `Bearer ${customerToken}`;
@@ -60,7 +67,7 @@ export const apiService = {
   // Products
   getProducts: (params?: any) => api.get('/products', { params }),
   getProductBySlugOrId: (identifier: string) => api.get(`/products/${identifier}`),
-  createProduct: (formData: FormData) => api.post('/products', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  createProduct: (formData: FormData | any) => api.post('/products', formData),
   updateProduct: (id: string, data: any) => api.put(`/products/${id}`, data),
   deleteProduct: (id: string) => api.delete(`/products/${id}`),
   restoreProduct: (id: string) => api.patch(`/products/${id}/restore`),
@@ -80,7 +87,7 @@ export const apiService = {
   updateOrderStatusAdmin: (id: string, status: string, note?: string) => api.patch(`/orders/admin/${id}/status`, { status, note }),
 
   // Payments & Proof Verification
-  uploadPaymentProof: (formData: FormData) => api.post('/payments/upload-proof', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  uploadPaymentProof: (formData: FormData | any) => api.post('/payments/upload-proof', formData),
   getPendingPaymentsAdmin: () => api.get('/payments/pending'),
   verifyPaymentAdmin: (paymentId: string, action: 'approve' | 'reject', rejectionReason?: string) => api.patch(`/payments/verify/${paymentId}`, { action, rejectionReason }),
   createRazorpayOrder: (amount: number, orderId?: string) => api.post('/payments/razorpay/create-order', { amount, orderId }),
